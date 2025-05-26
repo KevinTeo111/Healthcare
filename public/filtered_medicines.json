@@ -1,0 +1,500 @@
+[
+    {
+        "name": "Augmentin 625 Duo Tablet",
+        "price": 223.42,
+        "manufacturer_name": "Glaxo SmithKline Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Azithral 500 Tablet",
+        "price": 132.36,
+        "manufacturer_name": "Alembic Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 5 tablets"
+    },
+    {
+        "name": "Ascoril LS Syrup",
+        "price": 118.0,
+        "manufacturer_name": "Glenmark Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 100 ml Syrup"
+    },
+    {
+        "name": "Allegra 120mg Tablet",
+        "price": 218.81,
+        "manufacturer_name": "Sanofi India  Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Avil 25 Tablet",
+        "price": 10.96,
+        "manufacturer_name": "Sanofi India  Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Allegra-M Tablet",
+        "price": 241.48,
+        "manufacturer_name": "Sanofi India  Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Amoxyclav 625 Tablet",
+        "price": 223.27,
+        "manufacturer_name": "Abbott",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Azee 500 Tablet",
+        "price": 132.38,
+        "manufacturer_name": "Cipla Ltd",
+        "pack_size_label": "strip of 5 tablets"
+    },
+    {
+        "name": "Atarax 25mg Tablet",
+        "price": 85.5,
+        "manufacturer_name": "Dr Reddy's Laboratories Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Ascoril D Plus Syrup Sugar Free",
+        "price": 129.0,
+        "manufacturer_name": "Glenmark Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 100 ml Syrup"
+    },
+    {
+        "name": "Aciloc 150 Tablet",
+        "price": 40.94,
+        "manufacturer_name": "Cadila Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 30 tablets"
+    },
+    {
+        "name": "Alex Syrup",
+        "price": 129.0,
+        "manufacturer_name": "Glenmark Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 100 ml Syrup"
+    },
+    {
+        "name": "Anovate Cream",
+        "price": 134.2,
+        "manufacturer_name": "USV Ltd",
+        "pack_size_label": "tube of 20 gm Cream"
+    },
+    {
+        "name": "Augmentin Duo Oral Suspension",
+        "price": 67.2,
+        "manufacturer_name": "Glaxo SmithKline Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 30 ml Oral Suspension"
+    },
+    {
+        "name": "Ambrodil-S Syrup",
+        "price": 30.2,
+        "manufacturer_name": "Aristo Pharmaceuticals Pvt Ltd",
+        "pack_size_label": "bottle of 100 ml Syrup"
+    },
+    {
+        "name": "Arkamin Tablet",
+        "price": 72.65,
+        "manufacturer_name": "Torrent Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 30 tablets"
+    },
+    {
+        "name": "Avomine Tablet",
+        "price": 55.98,
+        "manufacturer_name": "Abbott",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Asthakind-DX Syrup Sugar Free",
+        "price": 70.4,
+        "manufacturer_name": "Mankind Pharma Ltd",
+        "pack_size_label": "bottle of 60 ml Syrup"
+    },
+    {
+        "name": "Allegra 180mg Tablet",
+        "price": 251.2,
+        "manufacturer_name": "Sanofi India  Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Albendazole 400mg Tablet",
+        "price": 9.58,
+        "manufacturer_name": "Cadila Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 1 Tablet"
+    },
+    {
+        "name": "Asthalin Syrup",
+        "price": 19.04,
+        "manufacturer_name": "Cipla Ltd",
+        "pack_size_label": "bottle of 100 ml Syrup"
+    },
+    {
+        "name": "Alprax 0.25 Tablet",
+        "price": 29.0,
+        "manufacturer_name": "Torrent Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Altraday Capsule SR",
+        "price": 128.0,
+        "manufacturer_name": "Sun Pharmaceutical Industries Ltd",
+        "pack_size_label": "strip of 10 capsule sr"
+    },
+    {
+        "name": "Ativan 2mg Tablet",
+        "price": 91.87,
+        "manufacturer_name": "Pfizer Ltd",
+        "pack_size_label": "strip of 30 tablets"
+    },
+    {
+        "name": "Ascoril LS Junior Syrup",
+        "price": 96.0,
+        "manufacturer_name": "Glenmark Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 60 ml Syrup"
+    },
+    {
+        "name": "Asthalin 100mcg Inhaler",
+        "price": 157.85,
+        "manufacturer_name": "Cipla Ltd",
+        "pack_size_label": "packet of 200 MDI Inhaler"
+    },
+    {
+        "name": "Almox 500 Capsule",
+        "price": 80.26,
+        "manufacturer_name": "Alkem Laboratories Ltd",
+        "pack_size_label": "strip of 10 capsules"
+    },
+    {
+        "name": "Atarax 10mg Tablet",
+        "price": 47.91,
+        "manufacturer_name": "Dr Reddy's Laboratories Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Aciloc RD 20 Tablet",
+        "price": 77.0,
+        "manufacturer_name": "Cadila Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Aldactone Tablet",
+        "price": 35.35,
+        "manufacturer_name": "RPG Life Sciences Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Allegra Suspension Raspberry & Vanilla",
+        "price": 188.78,
+        "manufacturer_name": "Sanofi India  Ltd",
+        "pack_size_label": "bottle of 100 ml Oral Suspension"
+    },
+    {
+        "name": "Atarax Syrup",
+        "price": 110.25,
+        "manufacturer_name": "Dr Reddy's Laboratories Ltd",
+        "pack_size_label": "bottle of 100 ml Syrup"
+    },
+    {
+        "name": "Amlokind-AT Tablet",
+        "price": 44.7,
+        "manufacturer_name": "Mankind Pharma Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Axcer  90mg Tablet",
+        "price": 420.0,
+        "manufacturer_name": "Sun Pharmaceutical Industries Ltd",
+        "pack_size_label": "strip of 14 tablets"
+    },
+    {
+        "name": "Ativan 1mg Tablet",
+        "price": 75.67,
+        "manufacturer_name": "Pfizer Ltd",
+        "pack_size_label": "strip of 30 tablets"
+    },
+    {
+        "name": "Alkasol Oral Solution",
+        "price": 122.05,
+        "manufacturer_name": "Stadmed Pvt Ltd",
+        "pack_size_label": "bottle of 100 ml Oral Solution"
+    },
+    {
+        "name": "Aldigesic P 100mg/325mg Tablet",
+        "price": 110.0,
+        "manufacturer_name": "Alkem Laboratories Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Alfoo 10mg Tablet PR",
+        "price": 687.75,
+        "manufacturer_name": "Dr Reddy's Laboratories Ltd",
+        "pack_size_label": "strip of 30 Tablet pr"
+    },
+    {
+        "name": "Alprax 0.5mg Tablet",
+        "price": 66.9,
+        "manufacturer_name": "Torrent Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Arachitol 6L Injection",
+        "price": 407.76,
+        "manufacturer_name": "Abbott",
+        "pack_size_label": "packet of 6 injections"
+    },
+    {
+        "name": "Anafortan 25 mg/300 mg Tablet",
+        "price": 124.56,
+        "manufacturer_name": "Abbott",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Alex Junior Syrup",
+        "price": 95.0,
+        "manufacturer_name": "Glenmark Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 60 ml Syrup"
+    },
+    {
+        "name": "Azithral 200 Liquid",
+        "price": 57.25,
+        "manufacturer_name": "Alembic Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 15 ml Oral Suspension"
+    },
+    {
+        "name": "AB Phylline Capsule",
+        "price": 162.0,
+        "manufacturer_name": "Sun Pharmaceutical Industries Ltd",
+        "pack_size_label": "strip of 10 capsules"
+    },
+    {
+        "name": "Althrocin 500 Tablet",
+        "price": 110.3,
+        "manufacturer_name": "Alembic Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Augmentin DDS Suspension",
+        "price": 173.0,
+        "manufacturer_name": "Glaxo SmithKline Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 30 ml Oral Suspension"
+    },
+    {
+        "name": "Azicip 500 Tablet",
+        "price": 79.43,
+        "manufacturer_name": "Cipla Ltd",
+        "pack_size_label": "strip of 3 tablets"
+    },
+    {
+        "name": "Aldigesic-SP Tablet",
+        "price": 120.0,
+        "manufacturer_name": "Alkem Laboratories Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Amoxycillin 500mg Capsule",
+        "price": 31.9,
+        "manufacturer_name": "Jagsonpal Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 10 capsules"
+    },
+    {
+        "name": "Asthakind Expectorant Sugar Free",
+        "price": 64.22,
+        "manufacturer_name": "Mankind Pharma Ltd",
+        "pack_size_label": "bottle of 60 ml Expectorant"
+    },
+    {
+        "name": "Acemiz Plus Tablet",
+        "price": 99.5,
+        "manufacturer_name": "Lupin Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Aceclo Plus Tablet",
+        "price": 90.85,
+        "manufacturer_name": "Aristo Pharmaceuticals Pvt Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Anobliss Cream",
+        "price": 136.68,
+        "manufacturer_name": "Samarth Life Sciences Pvt Ltd",
+        "pack_size_label": "tube of 30 gm Rectal Cream"
+    },
+    {
+        "name": "Alex Cough Lozenges Lemon Ginger",
+        "price": 108.0,
+        "manufacturer_name": "Glenmark Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 10 lozenges"
+    },
+    {
+        "name": "Asthalin Respules",
+        "price": 7.07,
+        "manufacturer_name": "Cipla Ltd",
+        "pack_size_label": "packet of 2.5 ml Respules"
+    },
+    {
+        "name": "Avil Injection",
+        "price": 21.17,
+        "manufacturer_name": "Sanofi India  Ltd",
+        "pack_size_label": "vial of 10 ml Injection"
+    },
+    {
+        "name": "Azee 200mg Dry Syrup",
+        "price": 52.31,
+        "manufacturer_name": "Cipla Ltd",
+        "pack_size_label": "bottle of 15 ml Oral Suspension"
+    },
+    {
+        "name": "Atorva Tablet",
+        "price": 102.31,
+        "manufacturer_name": "Zydus Cadila",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Asthakind-LS Expectorant Cola Sugar Free",
+        "price": 93.5,
+        "manufacturer_name": "Mankind Pharma Ltd",
+        "pack_size_label": "bottle of 100 ml Expectorant"
+    },
+    {
+        "name": "Ascoril LS Drops",
+        "price": 72.0,
+        "manufacturer_name": "Glenmark Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 15 ml Oral Drops"
+    },
+    {
+        "name": "Azmarda 50mg Tablet",
+        "price": 1092.03,
+        "manufacturer_name": "J B Chemicals and Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 14 tablets"
+    },
+    {
+        "name": "Amixide-H Tablet",
+        "price": 51.0,
+        "manufacturer_name": "Sun Pharmaceutical Industries Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "AB-Flo-N Tablet",
+        "price": 207.25,
+        "manufacturer_name": "Lupin Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "AF Kit Tablet",
+        "price": 110.0,
+        "manufacturer_name": "Systopic Laboratories Pvt Ltd",
+        "pack_size_label": "strip of 4 tablets"
+    },
+    {
+        "name": "Amlokind 5 Tablet",
+        "price": 22.15,
+        "manufacturer_name": "Mankind Pharma Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Amlong Tablet",
+        "price": 48.55,
+        "manufacturer_name": "Micro Labs Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Akt 4 Kit",
+        "price": 24.7,
+        "manufacturer_name": "Lupin Ltd",
+        "pack_size_label": "packet of 1 Kit"
+    },
+    {
+        "name": "Ascoril D Junior Cough Syrup",
+        "price": 98.0,
+        "manufacturer_name": "Glenmark Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 60 ml Syrup"
+    },
+    {
+        "name": "Amitone 10mg Tablet",
+        "price": 19.15,
+        "manufacturer_name": "Intas Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Aulin 100mg Tablet",
+        "price": 50.56,
+        "manufacturer_name": "Elder Pharmaceuticals Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Amikacin Sulphate 500mg Injection",
+        "price": 11.87,
+        "manufacturer_name": "Sun Pharmaceutical Industries Ltd",
+        "pack_size_label": "vial of 2 ml Injection"
+    },
+    {
+        "name": "Ambrodil-LX Syrup",
+        "price": 90.85,
+        "manufacturer_name": "Aristo Pharmaceuticals Pvt Ltd",
+        "pack_size_label": "bottle of 100 ml Syrup"
+    },
+    {
+        "name": "Aquasol A Capsule",
+        "price": 29.6,
+        "manufacturer_name": "USV Ltd",
+        "pack_size_label": "bottle of 30 capsules"
+    },
+    {
+        "name": "AB Phylline SR 200 Tablet",
+        "price": 252.0,
+        "manufacturer_name": "Sun Pharmaceutical Industries Ltd",
+        "pack_size_label": "strip of 10 tablet sr"
+    },
+    {
+        "name": "Azoran Tablet",
+        "price": 106.65,
+        "manufacturer_name": "RPG Life Sciences Ltd",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Amaryl 1mg Tablet",
+        "price": 133.81,
+        "manufacturer_name": "Sanofi India  Ltd",
+        "pack_size_label": "strip of 30 tablets"
+    },
+    {
+        "name": "Aztor 10 Tablet",
+        "price": 102.25,
+        "manufacturer_name": "Sun Pharmaceutical Industries Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Atorva 40 Tablet",
+        "price": 239.89,
+        "manufacturer_name": "Zydus Cadila",
+        "pack_size_label": "strip of 10 tablets"
+    },
+    {
+        "name": "Azax 500 Tablet",
+        "price": 79.3,
+        "manufacturer_name": "Sun Pharmaceutical Industries Ltd",
+        "pack_size_label": "strip of 3 tablets"
+    },
+    {
+        "name": "Alex Syrup Sugar Free",
+        "price": 129.0,
+        "manufacturer_name": "Glenmark Pharmaceuticals Ltd",
+        "pack_size_label": "bottle of 100 ml Syrup"
+    },
+    {
+        "name": "Anxit 0.5 Tablet",
+        "price": 47.0,
+        "manufacturer_name": "Micro Labs Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Anxit 0.25mg Tablet",
+        "price": 20.5,
+        "manufacturer_name": "Micro Labs Ltd",
+        "pack_size_label": "strip of 15 tablets"
+    },
+    {
+        "name": "Acitrom 2 Tablet",
+        "price": 414.65,
+        "manufacturer_name": "Abbott",
+        "pack_size_label": "strip of 30 tablets"
+    }
+]

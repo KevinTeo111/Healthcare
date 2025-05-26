@@ -1,0 +1,120 @@
+15-Day Project Report: Medical Management Web Application
+
+Day 1: Project Initialization
+- Set up a new Next.js project with TypeScript for type safety and scalability.
+- Initialized a Git repository for version control and created the initial commit.
+- Installed core dependencies: Next.js, React, TypeScript, MongoDB, TailwindCSS, ESLint, and related type packages.
+- Configured initial project structure and scripts for development, build, and linting.
+- Set up the `.gitignore` file and basic README documentation.
+- Verified the development server runs and displays the default Next.js page.
+
+Day 2: MongoDB Integration
+- Created a MongoDB connection utility (`mongodb.ts`) for efficient, serverless-compatible database access.
+- Set up a MongoDB Atlas cluster and verified connectivity with credentials.
+- Implemented error handling for database connection failures.
+- Tested database connection with a sample API route and logged results.
+- Documented MongoDB connection setup in the README for future reference.
+- Ensured environment variables are handled securely for database credentials.
+
+Day 3: API Structure & Mock Data
+- Designed the API folder structure for RESTful endpoints: `/api/patients`, `/api/appointments`, `/api/prescriptions`.
+- Implemented mock data for patients to enable frontend development without a live database.
+- Built basic GET endpoints for patients to serve mock data.
+- Added TypeScript interfaces for patient, appointment, and prescription data models.
+- Wrote unit tests for the mock API endpoints to ensure correct responses.
+- Updated the README with API endpoint documentation.
+
+Day 4: Patients API & UI
+- Developed the `/api/patients` endpoint to serve patient data from mock or database.
+- Built a React table UI to display patients on the `/doctor/patients` page.
+- Added basic styling and responsive layout for the patients table.
+- Implemented loading and error states for the patients page.
+- Connected the frontend to the backend API for real data fetching.
+- Added sorting and filtering options to the patients table.
+
+Day 5: Appointments API & UI
+- Developed `/api/appointments` endpoint for CRUD operations (create, read, update, delete).
+- Implemented appointment scheduling UI with form validation.
+- Integrated appointment creation with the backend and updated the UI in real time.
+- Added the ability to edit and delete appointments from the UI.
+- Ensured appointment data is validated on both frontend and backend.
+- Wrote tests for appointment API endpoints and UI interactions.
+
+Day 6: Prescriptions API & UI
+- Implemented `/api/prescriptions` endpoint for creating and fetching prescriptions.
+- Built a prescription creation form with medicine search, selection, and quantity management.
+- Enabled saving and retrieving prescription data from MongoDB.
+- Added validation for prescription fields and medicine selection.
+- Displayed prescription history for each patient in the UI.
+- Documented prescription API usage in the README.
+
+Day 7: Dashboard Layout
+- Designed the main dashboard layout with a sidebar for navigation and a topbar for user info and search.
+- Added navigation links for dashboard, patients, appointments, and notifications.
+- Ensured a consistent and modern look using TailwindCSS and custom styles.
+- Implemented responsive design for mobile and desktop views.
+- Added icons and tooltips to sidebar navigation for better UX.
+- Created placeholder sections for analytics and recent activity.
+
+Day 8: Patient Management Features
+- Enhanced the patient management table to show last visit dates by merging appointment data.
+- Implemented logic to update the last visit dynamically based on appointment history.
+- Improved the UI to highlight active and recently updated patients.
+- Added the ability to search and filter patients by name or last visit.
+- Connected patient management features to the backend for real-time updates.
+- Wrote integration tests for patient management workflows.
+
+Day 9: Appointment Management Features
+- Enabled adding, editing, and deleting appointments directly from the dashboard.
+- Implemented optimistic UI updates for a smoother user experience.
+- Added confirmation dialogs for destructive actions (e.g., deleting appointments).
+- Improved appointment list sorting and filtering by date and patient.
+- Connected appointment management to analytics and recent activity sections.
+- Documented appointment management features in the README.
+
+Day 10: Prescription Management Features
+- Linked prescription management from the dashboard for quick access.
+- Allowed users to view, add, and manage prescriptions for each patient.
+- Displayed prescription history and details in a user-friendly format.
+- Added export and print options for prescriptions.
+- Ensured prescription data is always up-to-date with backend changes.
+- Wrote tests for prescription management workflows.
+
+Day 11: Search & Filtering
+- Added search functionality for patients and appointments in the topbar.
+- Implemented real-time filtering and navigation based on search results.
+- Enhanced the search experience with clear result categories and navigation links.
+- Added keyboard navigation and accessibility improvements to the search bar.
+- Connected search results to patient and appointment detail pages.
+- Documented search and filtering features in the README.
+
+Day 12: Footer & UI Consistency
+- Created a reusable Footer component with links to privacy policy and terms.
+- Added the footer to all main pages for a consistent look and feel.
+- Reviewed and unified styling across all pages for a professional appearance.
+- Ensured the footer is responsive and accessible on all devices.
+- Updated color schemes and font choices for better readability.
+- Performed a UI review and made adjustments based on feedback.
+
+Day 13: Data Freshness & Auto-Refresh
+- Updated all fetch requests to use `{ cache: 'no-store' }` to always get fresh data from the backend.
+- Added a listener to auto-refresh patient and appointment data when the browser tab becomes active.
+- Ensured that new appointments and prescriptions are reflected immediately in the UI.
+- Implemented polling for critical data to keep the dashboard up-to-date.
+- Added notifications for data refresh events.
+- Documented data freshness strategies in the README.
+
+Day 14: Error Handling & UX Improvements
+- Improved error messages and loading indicators across all pages for better user feedback.
+- Refactored code for readability, maintainability, and performance.
+- Added edge case handling for empty states and API failures.
+- Implemented fallback UI for network errors and server downtime.
+- Enhanced accessibility for error and loading states.
+- Wrote tests for error handling and edge cases.
+
+Day 15: Final Testing & Documentation
+- Performed end-to-end testing of all features: patients, appointments, prescriptions, and dashboard navigation.
+- Fixed bugs and polished UI/UX based on testing feedback.
+- Wrote project documentation, including setup instructions, feature overview, and deployment notes.
+- Prepared the project for deployment and handoff.
+- Conducted a final code review and merged all feature branches.

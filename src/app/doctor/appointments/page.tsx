@@ -33,6 +33,9 @@ const AppointmentsPage: React.FC = () => {
   const [bookingError, setBookingError] = useState<string | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
 
+  // User state
+  const [user, setUser] = useState<{ name: string; profession: string } | null>(null);
+
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
@@ -49,7 +52,20 @@ const AppointmentsPage: React.FC = () => {
       }
     };
 
+    // Fetch user details
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('/api/user');
+        if (!res.ok) throw new Error('Failed to fetch user');
+        const userData = await res.json();
+        setUser(userData);
+      } catch (err) {
+        setUser({ name: 'Unknown', profession: '' });
+      }
+    };
+
     fetchAppointments();
+    fetchUser();
   }, []);
 
   const handleAccept = (id: number) => {
@@ -164,20 +180,20 @@ const AppointmentsPage: React.FC = () => {
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, padding: '32px 32px 32px 0', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <main style={{ flex: 1, padding: '32px 32px 32px 0', display: 'flex', flexDirection: 'column', gap: 24, background: '#f7faff', minHeight: '100vh' }}>
         {/* Header */}
-        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', background: '#fff', borderRadius: 12, padding: '8px 20px', boxShadow: '0 1px 4px #e5e7eb', width: 400 }}>
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px #e5e7eb', padding: '16px 32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', background: '#f1f5f9', borderRadius: 12, padding: '8px 20px', boxShadow: 'none', width: 400 }}>
             <FaSearch style={{ color: '#64748b', fontSize: 18, marginRight: 10 }} />
             <input placeholder="Search for Anything" style={{ border: 'none', outline: 'none', fontSize: 16, width: '100%', background: 'transparent' }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
             <FaBell style={{ fontSize: 22, color: '#64748b', cursor: 'pointer' }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <img src="https://randomuser.me/api/portraits/men/31.jpg" alt="Dr. Mark James" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid #e0e7ff' }} />
+              <img src="https://randomuser.me/api/portraits/men/31.jpg" alt={user?.name || "User"} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid #e0e7ff' }} />
               <div>
-                <div style={{ fontWeight: 700, fontSize: 16 }}>Dr. Mark James</div>
-                <div style={{ color: '#64748b', fontSize: 14 }}>Dentist</div>
+                <div style={{ fontWeight: 700, fontSize: 16 }}>{user ? user.name : 'Loading...'}</div>
+                <div style={{ color: '#64748b', fontSize: 14 }}>{user ? user.profession : ''}</div>
               </div>
             </div>
           </div>
@@ -241,23 +257,6 @@ const AppointmentsPage: React.FC = () => {
                   <div key={date} style={{ width: 36, height: 36, borderRadius: '50%', background: date===11?'#2563eb':'#f1f5f9', color: date===11?'#fff':'#22223b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>{date}</div>
                 ))}
               </div>
-            </div>
-            {/* Timeline */}
-            <div style={{ background: '#fff', borderRadius: 16, padding: 24, boxShadow: '0 1px 4px #e5e7eb' }}>
-              <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 16 }}>Timeline</div>
-              {mockTimeline.map((item, idx) => (
-                <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: idx!==mockTimeline.length-1?'1px solid #f1f5f9':'none' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <div style={{ color: '#2563eb', fontWeight: 700 }}>{item.time}</div>
-                    <div style={{ fontWeight: 600 }}>{item.title}</div>
-                    <div style={{ color: '#64748b', fontSize: 14 }}>Patient Name - {item.patient}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <div style={{ color: '#64748b', fontWeight: 600 }}>{item.end}</div>
-                    <button style={{ background: 'none', color: '#2563eb', border: 'none', fontWeight: 600, cursor: 'pointer' }}>View Details</button>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 

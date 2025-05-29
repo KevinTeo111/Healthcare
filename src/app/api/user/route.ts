@@ -1,22 +1,28 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '../mongodb';
 
-export async function GET(request: Request) {
-  // Here, you would normally get the user from a session or JWT token.
-  // For demo, try to get user from DB by a hardcoded email (or from cookie in real app)
-  // Example: get email from cookie or session (not implemented here)
-  // const email = getEmailFromSessionOrCookie(request);
-  // For now, just return the first user in DB
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
     const client = await clientPromise;
     const db = client.db('prescriptionApp');
-    const user = await db.collection('users').findOne({});
-    if (user) {
-      return NextResponse.json({ name: user.fullName });
+    let user;
+    if (email) {
+      user = await db.collection('users').findOne({ email });
     } else {
-      return NextResponse.json({ name: 'Guest' });
+      user = await db.collection('users').findOne();
     }
-  } catch (e) {
-    return NextResponse.json({ name: 'Guest' });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+    // Support both {fullName, email, password} and {name, email, password}
+    return NextResponse.json({
+      name: user.name || user.fullName || '',
+      email: user.email || '',
+      password: user.password || '',
+    });
+  } catch (error) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
 }

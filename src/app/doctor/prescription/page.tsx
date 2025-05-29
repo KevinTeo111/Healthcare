@@ -189,8 +189,7 @@ Notes: ${notes}
     document.body.removeChild(element);
   };
 
-  // ...existing code...
-const printPrescription = async () => {
+  const printPrescription = async () => {
     const saved = await savePrescription();
     if (!saved) return;
     const printContent = `
@@ -269,7 +268,6 @@ const printPrescription = async () => {
       newWindow.close();
     }
   };
-// ...existing code...
 
   return (
     <div style={{
@@ -306,7 +304,7 @@ const printPrescription = async () => {
           <div className="logo-icon" style={{width: 36, height: 36, background: '#2563eb', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
             <span style={{color: '#fff', fontSize: 24, fontWeight: 'bold', fontFamily: 'Arial, sans-serif'}}>✚</span>
           </div>
-          <span className="logo-text" style={{color: '#2563eb', fontSize: 24, fontWeight: 700, letterSpacing: 1}}>MediCare Rx</span>
+          <span className="logo-text" style={{color: '#2563eb', fontSize: 24, fontWeight: 700, letterSpacing: 1}}>HealthSync Rx</span>
         </div>
         <div className="login-title" style={{color: '#22223b', fontSize: '2.1rem', fontWeight: 700, marginBottom: 18, textAlign: 'center', letterSpacing: 0.5}}>Create Prescription</div>
         {submitted ? (

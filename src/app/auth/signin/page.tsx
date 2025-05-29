@@ -1,11 +1,13 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import SignInForm from '../components/SignInForm';
 
 const SignInPage: React.FC = () => {
+  const router = useRouter();
   const handleSwitchToSignUp = () => {
-    // Implement switch to sign-up page if needed
+    router.push('/auth/signup');
   };
 
   return (

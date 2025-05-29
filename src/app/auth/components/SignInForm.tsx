@@ -46,9 +46,9 @@ export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
           <div className="logo-icon" style={{width: 32, height: 32, background: "#6c63ff", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center"}}>
             <span style={{color: "#fff", fontSize: 22, fontWeight: "bold", fontFamily: "Arial, sans-serif"}}>✦</span>
           </div>
-          <span className="logo-text" style={{color: "#6c63ff", fontSize: 22, fontWeight: 700, letterSpacing: 1}}>MediCare</span>
+          <span className="logo-text" style={{color: "#6c63ff", fontSize: 22, fontWeight: 700, letterSpacing: 1}}>HealthSync</span>
         </div>
-        <div className="login-title" style={{color: "#fff", fontSize: "2.2rem", fontWeight: 700, marginBottom: 24, textAlign: "center"}}>Login to MediCare </div>
+        <div className="login-title" style={{color: "#fff", fontSize: "2.2rem", fontWeight: 700, marginBottom: 24, textAlign: "center"}}>Login to HealthSync </div>
         <form style={{width: "100%"}} onSubmit={async (e) => {
           e.preventDefault();
           setMessage(null);
@@ -66,6 +66,7 @@ export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
               setMessage('Sign in successful! Redirecting...');
               if (data.fullName) {
                 localStorage.setItem('userName', data.fullName);
+                if (email) localStorage.setItem('userEmail', email);
               }
               router.push('/doctor');
             } else {

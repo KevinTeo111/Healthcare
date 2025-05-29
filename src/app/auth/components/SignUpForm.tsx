@@ -44,9 +44,9 @@ export default function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
           <div className="logo-icon" style={{width: 32, height: 32, background: "#6c63ff", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center"}}>
             <span style={{color: "#fff", fontSize: 22, fontWeight: "bold", fontFamily: "Arial, sans-serif"}}>✦</span>
           </div>
-          <span className="logo-text" style={{color: "#6c63ff", fontSize: 22, fontWeight: 700, letterSpacing: 1}}>MediCare</span>
+          <span className="logo-text" style={{color: "#6c63ff", fontSize: 22, fontWeight: 700, letterSpacing: 1}}>HealthSync</span>
         </div>
-        <div className="login-title" style={{color: "#fff", fontSize: "2rem", fontWeight: 700, marginBottom: 24, textAlign: "center"}}>Sign Up to MediCare</div>
+        <div className="login-title" style={{color: "#fff", fontSize: "2rem", fontWeight: 700, marginBottom: 24, textAlign: "center"}}>Sign Up to HealthSync</div>
         <form style={{width: "100%"}} onSubmit={async (e) => {
           e.preventDefault();
           setMessage(null);
@@ -64,6 +64,7 @@ export default function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
             if (res.ok) {
               // Auto-login: set localStorage and redirect to dashboard
               localStorage.setItem('userName', fullName);
+              localStorage.setItem('userEmail', email);
               window.location.href = '/doctor';
             } else {
               setMessage(data.error || 'Registration failed.');

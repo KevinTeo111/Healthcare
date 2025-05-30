@@ -4,7 +4,12 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
 // Sidebar component with icons
-const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+interface SidebarProps {
+  open: boolean;
+  onClose: () => void; // Ensure onClose is properly defined as a prop
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
   const router = useRouter();
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +81,10 @@ const Sidebar: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClo
         <div style={{ cursor: 'pointer', marginBottom: 32 }} title="Prescriptions" onClick={() => { router.push('/doctor/prescription'); onClose(); }}>
           <svg width="32" height="32" fill="white" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
           <span style={{ marginLeft: 16, fontSize: 18, verticalAlign: 'middle' }}>Prescriptions</span>
+        </div>
+        <div style={{ cursor: 'pointer', marginBottom: 32 }} title="Reports" onClick={() => { router.push('/doctor/reports'); onClose(); }}>
+          <svg width="32" height="32" fill="white" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8v-10h-8v10zm0-18v6h8V3h-8z"/></svg>
+          <span style={{ marginLeft: 16, fontSize: 18, verticalAlign: 'middle' }}>Reports</span>
         </div>
         <div style={{ cursor: 'pointer', marginBottom: 32 }} title="Logout" onClick={() => { router.push('/auth/signup'); onClose(); }}>
           <svg width="32" height="32" fill="white" viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4h8V9z"/></svg>
@@ -418,7 +427,7 @@ const DashboardNew: React.FC = () => {
       allergies: [], // Not available in prescription data
       labs: [], // Not available in prescription data
       prescriptions: patientPrescriptions.map((pres: any) => ({
-        date: pres.createdAt ? new Date(pres.createdAt).toLocaleDateString() : '-',
+        date: pres.createdAt ? new Date(pres.createdAt).toLocaleDateString('en-GB') : '-',
         medicines: pres.medicines || [],
         notes: pres.notes || '',
         disease: pres.disease || '',
@@ -441,6 +450,35 @@ const DashboardNew: React.FC = () => {
     // Placeholder for save logic
     alert('Profile updated! (not yet saved to backend)');
   };
+
+  // Fetch reports for the selected patient
+  useEffect(() => {
+    if (selectedPatient && selectedPatient.id) {
+      const fetchReports = async () => {
+        try {
+          const res = await fetch(`/api/reports?patientId=${selectedPatient.id}`);
+          if (res.ok) {
+            const data = await res.json();
+            console.log('Fetched reports:', data); // Log fetched reports
+            setSelectedPatient((prev: typeof selectedPatient) => {
+              if (prev?.id === selectedPatient.id) {
+                return prev; // Avoid unnecessary state updates
+              }
+              console.log('Updating selectedPatient with reports:', data); // Log update
+              return {
+                ...prev,
+                reports: Array.isArray(data) ? data : [],
+              };
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching patient reports:', error);
+        }
+      };
+
+      fetchReports();
+    }
+  }, [selectedPatient?.id]);
 
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f1f5f9', flexDirection: 'column' }}>
@@ -492,6 +530,19 @@ const DashboardNew: React.FC = () => {
                   )}
                   {selectedPatient.labs && selectedPatient.labs.length > 0 && selectedPatient.labs.some((l: string) => l && l !== '-') && (
                     <div style={{ marginBottom: 8 }}><strong>Lab Results:</strong> {selectedPatient.labs.filter((l: string) => l && l !== '-').join('; ')}</div>
+                  )}
+                  {selectedPatient.reports && selectedPatient.reports.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <strong>Uploaded Reports:</strong>
+                      <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                        {console.log('Rendering reports:', selectedPatient.reports)} {/* Log reports being rendered */}
+                        {selectedPatient.reports.map((report: any, idx: number) => (
+                          <li key={idx} style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
+                            <strong>File Name:</strong> {report.fileName}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
                   <div style={{ marginTop: 16 }}>
                     <strong>Prescription History:</strong>

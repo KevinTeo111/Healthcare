@@ -36,6 +36,8 @@ const PrescriptionPage: React.FC = () => {
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [bloodGroup, setBloodGroup] = useState('');
   const [disease, setDisease] = useState('');
+  const [customMedicineName, setCustomMedicineName] = useState('');
+  const [customMedicineQuantity, setCustomMedicineQuantity] = useState(1);
 
   useEffect(() => {
     fetch('/filtered_medicines.json')
@@ -269,6 +271,25 @@ Notes: ${notes}
     }
   };
 
+  const addCustomMedicine = () => {
+    if (!customMedicineName.trim()) {
+      alert('Please enter a medicine name.');
+      return;
+    }
+    const newMedicine: Medicine = {
+      id: customMedicineName.trim(),
+      name: customMedicineName.trim(),
+      price: '',
+      manufacturer_name: '',
+      pack_size_label: '',
+      short_composition1: '',
+      short_composition2: ''
+    };
+    setPrescriptionMedicines([...prescriptionMedicines, { medicine: newMedicine, quantity: customMedicineQuantity }]);
+    setCustomMedicineName('');
+    setCustomMedicineQuantity(1);
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -466,6 +487,33 @@ Notes: ${notes}
               </div>
             )}
             <div style={{ marginBottom: 16 }}>
+              <h3 style={{ color: '#2563eb', fontWeight: 700, marginBottom: 8 }}>Add Custom Medicine</h3>
+              <div style={{ display: 'flex', gap: 12, marginBottom: 8 }}>
+                <input
+                  type="text"
+                  value={customMedicineName}
+                  onChange={e => setCustomMedicineName(e.target.value)}
+                  placeholder="Medicine Name"
+                  style={{ flexGrow: 1, padding: 10, borderRadius: 6, border: '1px solid #cbd5e1', background: '#f8fafc' }}
+                />
+                <input
+                  type="number"
+                  min="1"
+                  value={customMedicineQuantity}
+                  onChange={e => setCustomMedicineQuantity(Number(e.target.value))}
+                  placeholder="Quantity"
+                  style={{ width: 100, padding: 10, borderRadius: 6, border: '1px solid #cbd5e1', background: '#f8fafc' }}
+                />
+                <button
+                  type="button"
+                  onClick={addCustomMedicine}
+                  style={{ padding: '10px 16px', background: '#10b981', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+            <div style={{ marginBottom: 16 }}>
               <label style={{ display: 'block', marginBottom: 4 }}>Notes</label>
               <textarea
                 value={notes}
@@ -529,6 +577,7 @@ Notes: ${notes}
                 Print
               </button>
             </div>
+            
           </form>
         )}
       </div>

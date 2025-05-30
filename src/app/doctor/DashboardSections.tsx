@@ -1,18 +1,66 @@
 import React from 'react';
+import PatientReports from './components/PatientReports';
 
+interface DashboardSectionsProps {
+  selectedPatient: any;
+  patientReports: any[];
+  setPatientReports: React.Dispatch<React.SetStateAction<any[]>>;
+  patientSearch: string;
+  setPatientSearch: React.Dispatch<React.SetStateAction<string>>;
+  patientResults: any[];
+}
 
-export const QuickAccess: React.FC = () => {
+const DashboardSections: React.FC<DashboardSectionsProps> = ({
+  selectedPatient,
+  patientReports,
+  setPatientReports,
+  patientSearch,
+  setPatientSearch,
+  patientResults,
+}) => {
   return (
-    <section style={{ marginBottom: 32 }}>
-      <h2>Quick Access</h2>
-      <div style={{ display: 'flex', gap: 12 }}>
-        <a href="/doctor/prescription" style={{ padding: '12px 24px', backgroundColor: '#22c55e', color: 'white', borderRadius: 8, textDecoration: 'none' }}>
-          Create Prescription
-        </a>
-        <a href="/doctor/patients" style={{ padding: '12px 24px', backgroundColor: '#3b82f6', color: 'white', borderRadius: 8, textDecoration: 'none' }}>
-          View Patients
-        </a>
+    <div>
+      <div style={{ marginTop: 32 }}>
+        <h3 style={{ color: '#2563eb', fontWeight: 700, marginBottom: 8 }}>Patient Medical History</h3>
+        {selectedPatient ? (
+          <div>
+            <div style={{ marginBottom: 8 }}><strong>Name:</strong> {selectedPatient.name}</div>
+            {selectedPatient.age && (<div style={{ marginBottom: 8 }}><strong>Age:</strong> {selectedPatient.age}</div>)}
+            {selectedPatient.gender && (<div style={{ marginBottom: 8 }}><strong>Gender:</strong> {selectedPatient.gender}</div>)}
+            {selectedPatient.bloodGroup && (<div style={{ marginBottom: 8 }}><strong>Blood Group:</strong> {selectedPatient.bloodGroup}</div>)}
+            {selectedPatient.diagnoses && selectedPatient.diagnoses.length > 0 && (
+              <div style={{ marginBottom: 8 }}><strong>Diagnoses:</strong> {selectedPatient.diagnoses.join(', ')}</div>
+            )}
+            {selectedPatient.prescriptions && selectedPatient.prescriptions.length > 0 && (
+              <div style={{ marginBottom: 8 }}><strong>Prescriptions:</strong>
+                <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                  {selectedPatient.prescriptions.map((pres: any, idx: number) => (
+                    <li key={idx} style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
+                      <strong>Date:</strong> {pres.date} | <strong>Disease:</strong> {pres.disease}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div style={{ color: '#64748b' }}>No patient selected.</div>
+        )}
       </div>
-    </section>
+
+      <div style={{ marginTop: 32 }}>
+        <h3 style={{ color: '#2563eb', fontWeight: 700, marginBottom: 8 }}>Patient Reports</h3>
+        <PatientReports
+          patientReports={patientReports}
+          selectedPatient={selectedPatient}
+          setPatientReports={setPatientReports}
+          patientSearch={patientSearch}
+          setPatientSearch={setPatientSearch}
+          patientResults={patientResults}
+        />
+      </div>
+    </div>
   );
 };
+
+export default DashboardSections;

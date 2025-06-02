@@ -507,75 +507,91 @@ const DashboardNew: React.FC = () => {
                   </ul>
                 )}
               </div>
-              {selectedPatient ? (
-                <div>
-                  <div style={{ marginBottom: 8 }}><strong>Name:</strong> {selectedPatient.name}</div>
-                  {selectedPatient.age && selectedPatient.age !== '-' && (
-                    <div style={{ marginBottom: 8 }}><strong>Age:</strong> {selectedPatient.age}</div>
-                  )}
-                  {selectedPatient.gender && selectedPatient.gender !== '-' && (
-                    <div style={{ marginBottom: 8 }}><strong>Gender:</strong> {selectedPatient.gender}</div>
-                  )}
-                  {selectedPatient.bloodGroup && selectedPatient.bloodGroup !== '-' && (
-                    <div style={{ marginBottom: 8 }}><strong>Blood Group:</strong> {selectedPatient.bloodGroup}</div>
-                  )}
-                  {selectedPatient.diagnoses && selectedPatient.diagnoses.length > 0 && selectedPatient.diagnoses.some((d: string) => d && d !== '-') && (
-                    <div style={{ marginBottom: 8 }}><strong>Diagnoses:</strong> {selectedPatient.diagnoses.filter((d: string) => d && d !== '-').join(', ')}</div>
-                  )}
-                  {selectedPatient.treatments && selectedPatient.treatments.length > 0 && selectedPatient.treatments.some((t: string) => t && t !== '-') && (
-                    <div style={{ marginBottom: 8 }}><strong>Treatments:</strong> {selectedPatient.treatments.filter((t: string) => t && t !== '-').join(', ')}</div>
-                  )}
-                  {selectedPatient.allergies && selectedPatient.allergies.length > 0 && selectedPatient.allergies.some((a: string) => a && a !== '-') && (
-                    <div style={{ marginBottom: 8 }}><strong>Allergies:</strong> {selectedPatient.allergies.filter((a: string) => a && a !== '-').join(', ')}</div>
-                  )}
-                  {selectedPatient.labs && selectedPatient.labs.length > 0 && selectedPatient.labs.some((l: string) => l && l !== '-') && (
-                    <div style={{ marginBottom: 8 }}><strong>Lab Results:</strong> {selectedPatient.labs.filter((l: string) => l && l !== '-').join('; ')}</div>
-                  )}
-                  {selectedPatient.reports && selectedPatient.reports.length > 0 && (
-                    <div style={{ marginBottom: 8 }}>
-                      <strong>Uploaded Reports:</strong>
-                      <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-                        {console.log('Rendering reports:', selectedPatient.reports)} {/* Log reports being rendered */}
-                        {selectedPatient.reports.map((report: any, idx: number) => (
-                          <li key={idx} style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
-                            <strong>File Name:</strong> {report.fileName}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  <div style={{ marginTop: 16 }}>
-                    <strong>Prescription History:</strong>
-                    <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-                      {selectedPatient.prescriptions.map((pres: any, idx: number) => {
-                        const hasDate = pres.date && pres.date !== '-';
-                        const hasDisease = pres.disease && pres.disease !== '-';
-                        const hasNotes = pres.notes && pres.notes !== '-';
-                        const hasMeds = pres.medicines && pres.medicines.length > 0;
-                        if (!hasDate && !hasDisease && !hasNotes && !hasMeds) return null;
-                        return (
-                          <li key={idx} style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
-                            {hasDate && (<div><strong>Date:</strong> {pres.date}</div>)}
-                            {hasDisease && (<div><strong>Disease:</strong> {pres.disease}</div>)}
-                            {hasNotes && (<div><strong>Notes:</strong> {pres.notes}</div>)}
-                            {hasMeds && (
-                              <div><strong>Medicines:</strong>
-                                <ul style={{ margin: 0, paddingLeft: 16 }}>
-                                  {pres.medicines.map((med: any, i: number) => (
-                                    med.name && med.name !== '-' ? <li key={i}>{med.name} x{med.quantity}</li> : null
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
+{selectedPatient ? (
+  <div>
+    <button
+      onClick={() => setSelectedPatient(null)}
+      style={{
+        backgroundColor: '#ef4444',
+        color: 'white',
+        border: 'none',
+        borderRadius: 6,
+        padding: '6px 12px',
+        cursor: 'pointer',
+        marginBottom: 12,
+        fontWeight: '600',
+      }}
+      aria-label="Close patient medical history"
+    >
+      Close
+    </button>
+    <div style={{ marginBottom: 8 }}><strong>Name:</strong> {selectedPatient.name}</div>
+    {selectedPatient.age && selectedPatient.age !== '-' && (
+      <div style={{ marginBottom: 8 }}><strong>Age:</strong> {selectedPatient.age}</div>
+    )}
+    {selectedPatient.gender && selectedPatient.gender !== '-' && (
+      <div style={{ marginBottom: 8 }}><strong>Gender:</strong> {selectedPatient.gender}</div>
+    )}
+    {selectedPatient.bloodGroup && selectedPatient.bloodGroup !== '-' && (
+      <div style={{ marginBottom: 8 }}><strong>Blood Group:</strong> {selectedPatient.bloodGroup}</div>
+    )}
+    {selectedPatient.diagnoses && selectedPatient.diagnoses.length > 0 && selectedPatient.diagnoses.some((d: string) => d && d !== '-') && (
+      <div style={{ marginBottom: 8 }}><strong>Diagnoses:</strong> {selectedPatient.diagnoses.filter((d: string) => d && d !== '-').join(', ')}</div>
+    )}
+    {selectedPatient.treatments && selectedPatient.treatments.length > 0 && selectedPatient.treatments.some((t: string) => t && t !== '-') && (
+      <div style={{ marginBottom: 8 }}><strong>Treatments:</strong> {selectedPatient.treatments.filter((t: string) => t && t !== '-').join(', ')}</div>
+    )}
+    {selectedPatient.allergies && selectedPatient.allergies.length > 0 && selectedPatient.allergies.some((a: string) => a && a !== '-') && (
+      <div style={{ marginBottom: 8 }}><strong>Allergies:</strong> {selectedPatient.allergies.filter((a: string) => a && a !== '-').join(', ')}</div>
+    )}
+    {selectedPatient.labs && selectedPatient.labs.length > 0 && selectedPatient.labs.some((l: string) => l && l !== '-') && (
+      <div style={{ marginBottom: 8 }}><strong>Lab Results:</strong> {selectedPatient.labs.filter((l: string) => l && l !== '-').join('; ')}</div>
+    )}
+    {selectedPatient.reports && selectedPatient.reports.length > 0 && (
+      <div style={{ marginBottom: 8 }}>
+        <strong>Uploaded Reports:</strong>
+        <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+          {console.log('Rendering reports:', selectedPatient.reports)} {/* Log reports being rendered */}
+          {selectedPatient.reports.map((report: any, idx: number) => (
+            <li key={idx} style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
+              <strong>File Name:</strong> {report.fileName}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+    <div style={{ marginTop: 16 }}>
+      <strong>Prescription History:</strong>
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+        {selectedPatient.prescriptions.map((pres: any, idx: number) => {
+          const hasDate = pres.date && pres.date !== '-';
+          const hasDisease = pres.disease && pres.disease !== '-';
+          const hasNotes = pres.notes && pres.notes !== '-';
+          const hasMeds = pres.medicines && pres.medicines.length > 0;
+          if (!hasDate && !hasDisease && !hasNotes && !hasMeds) return null;
+          return (
+            <li key={idx} style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
+              {hasDate && (<div><strong>Date:</strong> {pres.date}</div>)}
+              {hasDisease && (<div><strong>Disease:</strong> {pres.disease}</div>)}
+              {hasNotes && (<div><strong>Notes:</strong> {pres.notes}</div>)}
+              {hasMeds && (
+                <div><strong>Medicines:</strong>
+                  <ul style={{ margin: 0, paddingLeft: 16 }}>
+                    {pres.medicines.map((med: any, i: number) => (
+                      med.name && med.name !== '-' ? <li key={i}>{med.name} x{med.quantity}</li> : null
+                    ))}
+                  </ul>
                 </div>
-              ) : (
-                <div style={{ color: '#64748b' }}>Search and select a patient to view their medical and prescription history.</div>
               )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </div>
+) : (
+  <div style={{ color: '#64748b' }}>Search and select a patient to view their medical and prescription history.</div>
+)}
             </Card>
 
             {/* Notifications & Alerts */}

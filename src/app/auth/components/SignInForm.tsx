@@ -45,7 +45,7 @@ export default function SignInForm({}: SignInFormProps) {
       if (data.role === 'doctor') {
         router.push('/doctor');
       } else {
-        router.push('/patient');
+        router.push('/dashboard/patient');
       }
 
     } catch (err) {
@@ -97,7 +97,7 @@ export default function SignInForm({}: SignInFormProps) {
           </div>
           <span className="logo-text" style={{color: "#6c63ff", fontSize: 22, fontWeight: 700, letterSpacing: 1}}>HealthSync</span>
         </div>
-        <div className="login-title" style={{color: "#fff", fontSize: "2.2rem", fontWeight: 700, marginBottom: 24, textAlign: "center"}}>Login to HealthSync </div>
+        <div className="login-title" style={{color: "#fff", fontSize: "2.2rem", fontWeight: 700, marginBottom: 24, textAlign: "center"}}>Sign In </div>
         {error && (
           <div style={{
             padding: '12px',
@@ -160,7 +160,7 @@ export default function SignInForm({}: SignInFormProps) {
         </form>
         <div className="signup-link" style={{color: "#bdbdbd", fontSize: "0.98rem", textAlign: "center", marginTop: 24}}>
           Don't have an Account?{' '}
-          <Link href="/auth/signup" style={{color: "#fff", textDecoration: "underline", marginLeft: 4}}>Sign up</Link>
+          <Link href="/auth/signup" style={{color: "#fff", textDecoration: "none", marginLeft: 4}}>Sign Up</Link>
         </div>
       </div>
     </div>

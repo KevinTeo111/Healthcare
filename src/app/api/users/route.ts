@@ -1,27 +1,86 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '../mongodb';
+import { connectToDatabase } from '../mongodb';
+import { ObjectId, WithId, Document } from 'mongodb';
 
-export async function GET(request: NextRequest) {
-  try {
-    const client = await clientPromise;
-    const db = client.db('prescriptionApp');
-    const users = await db.collection('users').find({}).toArray();
+interface User {
+  _id: ObjectId;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+}
 
-    if (!users || users.length === 0) {
-      return NextResponse.json({ error: 'No users found' }, { status: 404 });
+// GET /api/users - Get all users
+export async function GET() {
+  let retryCount = 0;
+  const maxRetries = 3;
+
+  while (retryCount < maxRetries) {
+    try {
+      console.log(`Attempt ${retryCount + 1} to fetch users...`);
+      const { db } = await connectToDatabase();
+      console.log('Connected to database successfully');
+
+      // Verify the users collection exists
+      const collections = await db.listCollections().toArray();
+      const hasUsersCollection = collections.some(c => c.name === 'users');
+      
+      if (!hasUsersCollection) {
+        console.log('Users collection does not exist, creating it...');
+        await db.createCollection('users');
+        console.log('Users collection created successfully');
+        return NextResponse.json([]);
+      }
+
+      console.log('Fetching users from collection...');
+      const users = await db.collection('users').find({}).toArray();
+      console.log(`Found ${users.length} users`);
+      
+      // Remove sensitive information
+      const sanitizedUsers = users.map((user: WithId<Document>) => {
+        try {
+          return {
+            _id: user._id,
+            name: user.fullName as string || '',
+            email: user.email as string || '',
+            role: user.role as string || 'patient', // Default to patient if role is missing
+            createdAt: user.createdAt as string || new Date().toISOString()
+          };
+        } catch (err) {
+          console.error('Error processing user:', user, err);
+          return null;
+        }
+      }).filter(Boolean); // Remove any null entries from failed processing
+
+      console.log('Successfully processed users');
+      return NextResponse.json(sanitizedUsers);
+    } catch (error) {
+      console.error(`Attempt ${retryCount + 1} failed:`, error);
+      retryCount++;
+      
+      if (retryCount === maxRetries) {
+        console.error('All retry attempts failed');
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        return NextResponse.json(
+          { 
+            error: 'Failed to fetch users',
+            details: errorMessage,
+            attempts: retryCount
+          },
+          { status: 500 }
+        );
+      }
+      
+      // Wait before retrying (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
     }
-
-    // Map users to include only necessary fields
-    const formattedUsers = users.map(user => ({
-      name: user.name || user.fullName || '',
-      email: user.email || '',
-      password: user.password || '',
-    }));
-
-    return NextResponse.json(formattedUsers);
-  } catch (error) {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
+
+  return NextResponse.json(
+    { error: 'Failed to fetch users after multiple attempts' },
+    { status: 500 }
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -59,32 +118,43 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+// PUT /api/users/[userId] - Update user role
+export async function PUT(request: Request, { params }: { params: { userId: string } }) {
   try {
-    const body = await request.json();
-    const { name, email, password } = body;
+    const { userId } = params;
+    const { role } = await request.json();
 
-    if (!name || !email || !password) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!['admin', 'doctor', 'patient'].includes(role)) {
+      return NextResponse.json(
+        { error: 'Invalid role' },
+        { status: 400 }
+      );
     }
 
-    const client = await clientPromise;
-    const db = client.db('prescriptionApp');
-
+    const { db } = await connectToDatabase();
     const result = await db.collection('users').updateOne(
-      { email },
-      { $set: { name, password } }
+      { _id: new ObjectId(userId) },
+      { $set: { role } }
     );
 
     if (result.matchedCount === 0) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ message: 'User updated successfully' }, { status: 200 });
+    return NextResponse.json({ message: 'User role updated successfully' });
   } catch (error) {
-    console.error('Error updating user:', error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: 'Failed to update user', details: errorMessage }, { status: 500 });
+    console.error('Error updating user role:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    return NextResponse.json(
+      { 
+        error: 'Failed to update user role',
+        details: errorMessage
+      },
+      { status: 500 }
+    );
   }
 }
 

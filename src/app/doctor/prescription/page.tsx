@@ -109,6 +109,11 @@ const PrescriptionPage: React.FC = () => {
     }
     const prescriptionData = {
       patientName,
+      age,
+      gender,
+      bloodGroup,
+      doctorName,
+      date,
       disease,
       notes,
       medicines: prescriptionMedicines.map(pm => ({
@@ -118,6 +123,7 @@ const PrescriptionPage: React.FC = () => {
       })),
       createdAt: new Date(),
     };
+    console.log(prescriptionData); // Debug: check all fields are present
     try {
       const res = await fetch('/api/prescriptions', {
         method: 'POST',
@@ -145,6 +151,11 @@ const PrescriptionPage: React.FC = () => {
     }
     const prescriptionData = {
       patientName,
+      age,
+      gender,
+      bloodGroup,
+      doctorName,
+      date,
       disease,
       notes,
       medicines: prescriptionMedicines.map(pm => ({
@@ -154,6 +165,7 @@ const PrescriptionPage: React.FC = () => {
       })),
       createdAt: new Date(),
     };
+    console.log(prescriptionData); // Debug: check all fields are present
     try {
       const res = await fetch('/api/prescriptions', {
         method: 'POST',

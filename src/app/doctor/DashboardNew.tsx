@@ -82,10 +82,6 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
           <svg width="32" height="32" fill="white" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
           <span style={{ marginLeft: 16, fontSize: 18, verticalAlign: 'middle' }}>Prescriptions</span>
         </div>
-        <div style={{ cursor: 'pointer', marginBottom: 32 }} title="Reports" onClick={() => { router.push('/doctor/reports'); onClose(); }}>
-          <svg width="32" height="32" fill="white" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8v-10h-8v10zm0-18v6h8V3h-8z"/></svg>
-          <span style={{ marginLeft: 16, fontSize: 18, verticalAlign: 'middle' }}>Reports</span>
-        </div>
         <div style={{ cursor: 'pointer', marginBottom: 32 }} title="Logout" onClick={() => { router.push('/auth/signup'); onClose(); }}>
           <svg width="32" height="32" fill="white" viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4h8V9z"/></svg>
           <span style={{ marginLeft: 16, fontSize: 18, verticalAlign: 'middle' }}>Logout</span>
@@ -128,7 +124,9 @@ const Topbar: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
 
   const handleLogout = async () => {
     try {
-      localStorage.removeItem('userName'); // Clear userName on logout
+      // Clear all user-related data from localStorage
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
       const res = await fetch('/api/logout', { method: 'POST' });
       if (res.ok) {
         // Route to home page after logout
@@ -301,27 +299,20 @@ const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, c
 const DashboardNew: React.FC = () => {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  // State for patient search and selection
   const [patientSearch, setPatientSearch] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
   const [patientResults, setPatientResults] = useState<any[]>([]);
-  // State for profile form
   const [profile, setProfile] = useState({
     name: 'Dr. John Doe',
     specialties: 'Cardiology',
     hours: 'Mon-Fri 9am-5pm',
     contact: 'dr.john@example.com',
   });
-  // State for notifications
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: 'appointment', message: 'New appointment scheduled with Jane Smith', time: '2 min ago' },
-    { id: 2, type: 'lab', message: 'Lab results available for John Doe', time: '10 min ago' },
-    { id: 3, type: 'message', message: 'Message from patient Alex Brown', time: '30 min ago' },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
 
-  // Fetch all prescriptions on mount
+  // Fetch prescriptions on mount
   useEffect(() => {
     setLoadingPrescriptions(true);
     fetch('/api/prescriptions')
@@ -335,48 +326,83 @@ const DashboardNew: React.FC = () => {
 
   const memoizedPrescriptions = useMemo(() => prescriptions, [prescriptions]);
 
-  // Real-time notifications via polling (replace with WebSocket for production)
+  // Real-time notifications & Appointment Requests via polling
   useEffect(() => {
-    const fetchNotifications = async () => {
+    const fetchNotificationsAndRequests = async () => {
       try {
-        const res = await fetch('/api/notifications');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data)) {
-            const now = new Date();
-            const prescriptionNotifications = memoizedPrescriptions.map((prescription, idx) => ({
-              id: `prescription-${idx + 1}`,
-              type: 'prescription',
-              message: `Patient ${prescription.patientName} was prescribed for ${prescription.disease}.`,
-              time: prescription.createdAt ? new Date(prescription.createdAt).toLocaleTimeString() : 'Just now',
-              createdAt: prescription.createdAt || now.toISOString(),
-            }));
+        // Fetch general notifications
+        const notificationsRes = await fetch('/api/notifications');
+        const generalNotifications = notificationsRes.ok ? await notificationsRes.json() : [];
 
-            const filteredNotifications = [
-              ...data.map((n, idx) => ({
-                ...n,
-                id: n.id || idx + 1,
-                time: n.time || 'Just now',
-                createdAt: n.createdAt || now.toISOString(),
-              })),
-              ...prescriptionNotifications,
-            ].filter(notification => {
-              const createdAt = new Date(notification.createdAt);
-              return (now.getTime() - createdAt.getTime()) <= 24 * 60 * 60 * 1000; // Keep notifications within 1 day
-            });
+        // Fetch pending appointment requests
+        const appointmentRequestsRes = await fetch('/api/appointment-requests');
+        const pendingRequests = appointmentRequestsRes.ok ? await appointmentRequestsRes.json() : [];
 
-            setNotifications(filteredNotifications);
-          }
-        }
-      } catch {
-        console.error('Failed to fetch notifications');
+        const now = new Date();
+
+        // Format appointment requests as notifications
+        const appointmentNotifications = pendingRequests.map((request: any) => ({
+          id: request._id, // Use the request ID as notification ID
+          type: 'appointment_request', // New type
+          message: `New appointment request from ${request.patientName} for ${request.preferredDate} at ${request.preferredTime}.`,
+          time: request.createdAt ? new Date(request.createdAt).toLocaleTimeString() : 'Just now',
+          createdAt: request.createdAt || now.toISOString(),
+          requestId: request._id, // Store original request ID
+        }));
+
+         // Format prescription notifications
+         const prescriptionNotifications = memoizedPrescriptions.map((prescription, idx) => ({
+          id: `prescription-${prescription._id || idx + 1}`,
+          type: 'prescription',
+          message: `Patient ${prescription.patientName} was prescribed for ${prescription.disease}.`,
+          time: prescription.createdAt ? new Date(prescription.createdAt).toLocaleTimeString() : 'Just now',
+          createdAt: prescription.createdAt || now.toISOString(),
+        }));
+
+        // Combine all notifications and sort by creation date
+        const allNotifications = [
+          ...generalNotifications.map((n: any) => ({ ...n, type: n.type || 'general', time: n.time || 'Just now', createdAt: n.createdAt || now.toISOString() })),
+          ...appointmentNotifications,
+          ...prescriptionNotifications,
+        ].filter(notification => {
+           const createdAt = new Date(notification.createdAt);
+           return (now.getTime() - createdAt.getTime()) <= 7 * 24 * 60 * 60 * 1000;
+        }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        setNotifications(allNotifications);
+
+      } catch (err) {
+        console.error('Failed to fetch notifications and appointment requests:', err);
       }
     };
 
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 300000); // Poll every 5 minutes
+    fetchNotificationsAndRequests();
+    const interval = setInterval(fetchNotificationsAndRequests, 30000); 
     return () => clearInterval(interval);
   }, [memoizedPrescriptions]);
+
+  // Handle accepting or rejecting appointment requests from notifications
+  const handleRequestAction = async (requestId: string, status: 'accepted' | 'rejected') => {
+    // Optimistically update UI: remove the request notification from the list
+    setNotifications((prevNotifications: any[]) => prevNotifications.filter((n: any) => !(n.type === 'appointment_request' && n.requestId === requestId)));
+
+    try {
+      // Call the backend API to update the request status
+      const res = await fetch(`/api/appointment-requests/${requestId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!res.ok) {
+        console.error(`Failed to update request ${requestId} status to ${status}`);
+        // Consider adding the notification back or showing an error message here
+      }
+    } catch (err) {
+       console.error(`Error updating request ${requestId} status:`, err);
+       // Consider adding the notification back or showing an error message here
+    }
+  };
 
   // Simulate patient search (replace with API integration)
   const handlePatientSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -413,12 +439,9 @@ const DashboardNew: React.FC = () => {
 
   // Simulate selecting a patient
   const handleSelectPatient = (patient: any) => {
-    // Filter all prescriptions for this patient (match all fields for uniqueness)
+    // Filter all prescriptions for this patient (match only by patientName)
     const patientPrescriptions = prescriptions.filter((p: any) =>
-      p.patientName === patient.name &&
-      String(p.age || '-') === String(patient.age || '-') &&
-      String(p.gender || '-') === String(patient.gender || '-') &&
-      String(p.bloodGroup || '-') === String(patient.bloodGroup || '-')
+      p.patientName === patient.name
     );
     setSelectedPatient({
       ...patient,
@@ -427,13 +450,15 @@ const DashboardNew: React.FC = () => {
       allergies: [], // Not available in prescription data
       labs: [], // Not available in prescription data
       prescriptions: patientPrescriptions.map((pres: any) => ({
-        date: pres.createdAt ? new Date(pres.createdAt).toLocaleDateString('en-GB') : '-',
+        date: pres.date || (pres.createdAt ? new Date(pres.createdAt).toLocaleDateString('en-GB') : '-'),
         medicines: pres.medicines || [],
         notes: pres.notes || '',
         disease: pres.disease || '',
         age: pres.age || '-',
         gender: pres.gender || '-',
         bloodGroup: pres.bloodGroup || '-',
+        doctorName: pres.doctorName || '',
+        createdAt: pres.createdAt || '',
       })),
     });
     setPatientSearch('');
@@ -450,35 +475,6 @@ const DashboardNew: React.FC = () => {
     // Placeholder for save logic
     alert('Profile updated! (not yet saved to backend)');
   };
-
-  // Fetch reports for the selected patient
-  useEffect(() => {
-    if (selectedPatient && selectedPatient.id) {
-      const fetchReports = async () => {
-        try {
-          const res = await fetch(`/api/reports?patientId=${selectedPatient.id}`);
-          if (res.ok) {
-            const data = await res.json();
-            console.log('Fetched reports:', data); // Log fetched reports
-            setSelectedPatient((prev: typeof selectedPatient) => {
-              if (prev?.id === selectedPatient.id) {
-                return prev; // Avoid unnecessary state updates
-              }
-              console.log('Updating selectedPatient with reports:', data); // Log update
-              return {
-                ...prev,
-                reports: Array.isArray(data) ? data : [],
-              };
-            });
-          }
-        } catch (error) {
-          console.error('Error fetching patient reports:', error);
-        }
-      };
-
-      fetchReports();
-    }
-  }, [selectedPatient?.id]);
 
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f1f5f9', flexDirection: 'column' }}>
@@ -507,91 +503,68 @@ const DashboardNew: React.FC = () => {
                   </ul>
                 )}
               </div>
-{selectedPatient ? (
-  <div>
-    <button
-      onClick={() => setSelectedPatient(null)}
-      style={{
-        backgroundColor: '#ef4444',
-        color: 'white',
-        border: 'none',
-        borderRadius: 6,
-        padding: '6px 12px',
-        cursor: 'pointer',
-        marginBottom: 12,
-        fontWeight: '600',
-      }}
-      aria-label="Close patient medical history"
-    >
-      Close
-    </button>
-    <div style={{ marginBottom: 8 }}><strong>Name:</strong> {selectedPatient.name}</div>
-    {selectedPatient.age && selectedPatient.age !== '-' && (
-      <div style={{ marginBottom: 8 }}><strong>Age:</strong> {selectedPatient.age}</div>
-    )}
-    {selectedPatient.gender && selectedPatient.gender !== '-' && (
-      <div style={{ marginBottom: 8 }}><strong>Gender:</strong> {selectedPatient.gender}</div>
-    )}
-    {selectedPatient.bloodGroup && selectedPatient.bloodGroup !== '-' && (
-      <div style={{ marginBottom: 8 }}><strong>Blood Group:</strong> {selectedPatient.bloodGroup}</div>
-    )}
-    {selectedPatient.diagnoses && selectedPatient.diagnoses.length > 0 && selectedPatient.diagnoses.some((d: string) => d && d !== '-') && (
-      <div style={{ marginBottom: 8 }}><strong>Diagnoses:</strong> {selectedPatient.diagnoses.filter((d: string) => d && d !== '-').join(', ')}</div>
-    )}
-    {selectedPatient.treatments && selectedPatient.treatments.length > 0 && selectedPatient.treatments.some((t: string) => t && t !== '-') && (
-      <div style={{ marginBottom: 8 }}><strong>Treatments:</strong> {selectedPatient.treatments.filter((t: string) => t && t !== '-').join(', ')}</div>
-    )}
-    {selectedPatient.allergies && selectedPatient.allergies.length > 0 && selectedPatient.allergies.some((a: string) => a && a !== '-') && (
-      <div style={{ marginBottom: 8 }}><strong>Allergies:</strong> {selectedPatient.allergies.filter((a: string) => a && a !== '-').join(', ')}</div>
-    )}
-    {selectedPatient.labs && selectedPatient.labs.length > 0 && selectedPatient.labs.some((l: string) => l && l !== '-') && (
-      <div style={{ marginBottom: 8 }}><strong>Lab Results:</strong> {selectedPatient.labs.filter((l: string) => l && l !== '-').join('; ')}</div>
-    )}
-    {selectedPatient.reports && selectedPatient.reports.length > 0 && (
-      <div style={{ marginBottom: 8 }}>
-        <strong>Uploaded Reports:</strong>
-        <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-          {console.log('Rendering reports:', selectedPatient.reports)} {/* Log reports being rendered */}
-          {selectedPatient.reports.map((report: any, idx: number) => (
-            <li key={idx} style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
-              <strong>File Name:</strong> {report.fileName}
-            </li>
-          ))}
-        </ul>
-      </div>
-    )}
-    <div style={{ marginTop: 16 }}>
-      <strong>Prescription History:</strong>
-      <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-        {selectedPatient.prescriptions.map((pres: any, idx: number) => {
-          const hasDate = pres.date && pres.date !== '-';
-          const hasDisease = pres.disease && pres.disease !== '-';
-          const hasNotes = pres.notes && pres.notes !== '-';
-          const hasMeds = pres.medicines && pres.medicines.length > 0;
-          if (!hasDate && !hasDisease && !hasNotes && !hasMeds) return null;
-          return (
-            <li key={idx} style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
-              {hasDate && (<div><strong>Date:</strong> {pres.date}</div>)}
-              {hasDisease && (<div><strong>Disease:</strong> {pres.disease}</div>)}
-              {hasNotes && (<div><strong>Notes:</strong> {pres.notes}</div>)}
-              {hasMeds && (
-                <div><strong>Medicines:</strong>
-                  <ul style={{ margin: 0, paddingLeft: 16 }}>
-                    {pres.medicines.map((med: any, i: number) => (
-                      med.name && med.name !== '-' ? <li key={i}>{med.name} x{med.quantity}</li> : null
-                    ))}
-                  </ul>
+              {selectedPatient ? (
+                <div>
+                  <button
+                    onClick={() => setSelectedPatient(null)}
+                    style={{
+                      backgroundColor: '#ef4444',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: 6,
+                      padding: '6px 12px',
+                      cursor: 'pointer',
+                      marginBottom: 12,
+                      fontWeight: '600',
+                    }}
+                    aria-label="Close patient medical history"
+                  >
+                    Close
+                  </button>
+                  <div style={{ marginBottom: 8 }}><strong>Name:</strong> {selectedPatient.name}</div>
+                  {selectedPatient.age && selectedPatient.age !== '-' && (
+                    <div style={{ marginBottom: 8 }}><strong>Age:</strong> {selectedPatient.age}</div>
+                  )}
+                  {selectedPatient.gender && selectedPatient.gender !== '-' && (
+                    <div style={{ marginBottom: 8 }}><strong>Gender:</strong> {selectedPatient.gender}</div>
+                  )}
+                  {selectedPatient.bloodGroup && selectedPatient.bloodGroup !== '-' && (
+                    <div style={{ marginBottom: 8 }}><strong>Blood Group:</strong> {selectedPatient.bloodGroup}</div>
+                  )}
+                  {selectedPatient.diagnoses && selectedPatient.diagnoses.length > 0 && selectedPatient.diagnoses.some((d: string) => d && d !== '-') && (
+                    <div style={{ marginBottom: 8 }}><strong>Diagnoses:</strong> {selectedPatient.diagnoses.filter((d: string) => d && d !== '-').join(', ')}</div>
+                  )}
+                  {selectedPatient.treatments && selectedPatient.treatments.length > 0 && selectedPatient.treatments.some((t: string) => t && t !== '-') && (
+                    <div style={{ marginBottom: 8 }}><strong>Treatments:</strong> {selectedPatient.treatments.filter((t: string) => t && t !== '-').join(', ')}</div>
+                  )}
+                  {selectedPatient.allergies && selectedPatient.allergies.length > 0 && selectedPatient.allergies.some((a: string) => a && a !== '-') && (
+                    <div style={{ marginBottom: 8 }}><strong>Allergies:</strong> {selectedPatient.allergies.filter((a: string) => a && a !== '-').join(', ')}</div>
+                  )}
+                  {/* Show prescription details */}
+                  {selectedPatient.prescriptions && selectedPatient.prescriptions.length > 0 && (
+                    <div style={{ marginTop: 16 }}>
+                      <strong>Prescriptions:</strong>
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        {selectedPatient.prescriptions.map((pres: any, idx: number) => (
+                          <li key={idx} style={{ marginBottom: 12, padding: 12, background: '#f9fafb', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                            <div><strong>Date:</strong> {pres.date || '-'}</div>
+                            <div><strong>Medicines:</strong> {Array.isArray(pres.medicines) && pres.medicines.length > 0 ? (
+                              pres.medicines.map((med: any, i: number) => (
+                                <span key={i}>
+                                  {med.name ? med.name : typeof med === 'string' ? med : ''}{med.quantity ? ` x${med.quantity}` : ''}{i < pres.medicines.length - 1 ? ', ' : ''}
+                                </span>
+                              ))
+                            ) : '-'}</div>
+                            <div><strong>Notes:</strong> {pres.notes ? pres.notes : '-'}</div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
+              ) : (
+                <div style={{ color: '#64748b' }}>No patient selected.</div>
               )}
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  </div>
-) : (
-  <div style={{ color: '#64748b' }}>Search and select a patient to view their medical and prescription history.</div>
-)}
             </Card>
 
             {/* Notifications & Alerts */}
@@ -601,19 +574,56 @@ const DashboardNew: React.FC = () => {
                   <li style={{ color: '#64748b', padding: 8 }}>No notifications.</li>
                 )}
                 {notifications.map(n => (
-                  <li key={n.id} style={{ padding: 8, borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <li key={`${n.type}-${n.id}`} style={{ padding: 8, borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 20 }}>
                       {n.type === 'appointment' && '📅'}
                       {n.type === 'lab' && '🧪'}
                       {n.type === 'message' && '💬'}
+                      {n.type === 'prescription' && '💊'}
+                      {n.type === 'appointment_request' && '📝'}
                     </span>
                     <span>{n.message}</span>
                     <span style={{ marginLeft: 'auto', color: '#94a3b8', fontSize: 13 }}>{n.time}</span>
+                     {/* Add Accept/Reject buttons next to appointment request notifications */}
+                     {n.type === 'appointment_request' && (
+                        <div style={{display: 'flex', gap: '8px'}}>
+                           <button
+                            onClick={() => handleRequestAction(n.requestId, 'accepted')}
+                            style={{
+                              padding: '4px 8px',
+                              background: '#10b981',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontWeight: '600',
+                              fontSize: '12px'
+                            }}
+                          >
+                            Accept
+                          </button>
+                          <button
+                             onClick={() => handleRequestAction(n.requestId, 'rejected')}
+                             style={{
+                               padding: '4px 8px',
+                               background: '#ef4444',
+                               color: 'white',
+                               border: 'none',
+                               borderRadius: '4px',
+                               cursor: 'pointer',
+                               fontWeight: '600',
+                               fontSize: '12px'
+                             }}
+                          >
+                             Reject
+                          </button>
+                        </div>
+                     )}
                   </li>
                 ))}
               </ul>
               <div style={{ color: '#64748b', marginTop: 8 }}>
-                {notifications.length === 0 ? 'No notifications yet.' : 'Real-time notifications enabled.'}
+                {notifications.length === 0 ? 'No notifications yet.' : 'Notifications updated periodically.'}
               </div>
             </Card>
           </div>

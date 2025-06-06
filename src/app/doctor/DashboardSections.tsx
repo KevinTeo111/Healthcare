@@ -1,10 +1,7 @@
 import React from 'react';
-import PatientReports from './components/PatientReports';
 
 interface DashboardSectionsProps {
   selectedPatient: any;
-  patientReports: any[];
-  setPatientReports: React.Dispatch<React.SetStateAction<any[]>>;
   patientSearch: string;
   setPatientSearch: React.Dispatch<React.SetStateAction<string>>;
   patientResults: any[];
@@ -12,8 +9,6 @@ interface DashboardSectionsProps {
 
 const DashboardSections: React.FC<DashboardSectionsProps> = ({
   selectedPatient,
-  patientReports,
-  setPatientReports,
   patientSearch,
   setPatientSearch,
   patientResults,
@@ -36,7 +31,20 @@ const DashboardSections: React.FC<DashboardSectionsProps> = ({
                 <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
                   {selectedPatient.prescriptions.map((pres: any, idx: number) => (
                     <li key={idx} style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
-                      <strong>Date:</strong> {pres.date} | <strong>Disease:</strong> {pres.disease}
+                      <div><strong>Date:</strong> {pres.date} | <strong>Disease:</strong> {pres.disease}</div>
+                      {pres.medicines && pres.medicines.length > 0 && (
+                        <div style={{ marginTop: 4 }}>
+                          <strong>Medicines:</strong>
+                          <ul style={{ margin: 0, paddingLeft: 16 }}>
+                            {pres.medicines.map((med: any, mIdx: number) => (
+                              <li key={mIdx}>{med.name} x{med.quantity}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {pres.notes && (
+                        <div style={{ marginTop: 4 }}><strong>Notes:</strong> {pres.notes}</div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -46,18 +54,6 @@ const DashboardSections: React.FC<DashboardSectionsProps> = ({
         ) : (
           <div style={{ color: '#64748b' }}>No patient selected.</div>
         )}
-      </div>
-
-      <div style={{ marginTop: 32 }}>
-        <h3 style={{ color: '#2563eb', fontWeight: 700, marginBottom: 8 }}>Patient Reports</h3>
-        <PatientReports
-          patientReports={patientReports}
-          selectedPatient={selectedPatient}
-          setPatientReports={setPatientReports}
-          patientSearch={patientSearch}
-          setPatientSearch={setPatientSearch}
-          patientResults={patientResults}
-        />
       </div>
     </div>
   );

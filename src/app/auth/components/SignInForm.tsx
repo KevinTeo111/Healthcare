@@ -1,25 +1,73 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-interface SignInFormProps {
-  onSwitchToSignUp?: () => void;
-}
+interface SignInFormProps {}
 
-export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
+export default function SignInForm({}: SignInFormProps) {
   const router = useRouter();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    role: 'patient' // Default role
+  });
   const [showPassword, setShowPassword] = React.useState(false);
-  const [message, setMessage] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password, role: formData.role }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to sign in');
+      }
+
+      console.log('User signed in with role:', data.role);
+
+      // Store user info in localStorage
+      localStorage.setItem('userEmail', formData.email);
+      localStorage.setItem('userName', data.name);
+      localStorage.setItem('userRole', data.role);
+
+      // Redirect based on role
+      if (data.role === 'doctor') {
+        router.push('/doctor');
+      } else {
+        router.push('/patient');
+      }
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sign in');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   return (
     <div style={{
       minHeight: "100vh",
       width: "100vw",
-      backgroundImage: "url('/ChatGPT%20Image%20May%2018,%202025,%2011_44_41%20PM.png')",
+      backgroundImage: "url('/ChatGPT%20Image%20May%2018, 2025, 11_44_41 PM.png')", // Add background image
       backgroundRepeat: "no-repeat",
-      backgroundPosition: "center top",
-      backgroundAttachment: "fixed",
+      backgroundPosition: "center",
       backgroundSize: "cover",
-      imageRendering: "auto", // Ensures best quality scaling
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -29,7 +77,8 @@ export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
       left: 0,
       right: 0,
       bottom: 0,
-      zIndex: 1000
+      zIndex: 1000,
+      color: "#fff"
     }}>
       <div className="login-container" style={{
         background: "rgba(30, 32, 38, 0.85)",
@@ -49,48 +98,38 @@ export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
           <span className="logo-text" style={{color: "#6c63ff", fontSize: 22, fontWeight: 700, letterSpacing: 1}}>HealthSync</span>
         </div>
         <div className="login-title" style={{color: "#fff", fontSize: "2.2rem", fontWeight: 700, marginBottom: 24, textAlign: "center"}}>Login to HealthSync </div>
-        <form style={{width: "100%"}} onSubmit={async (e) => {
-          e.preventDefault();
-          setMessage(null);
-          const form = e.currentTarget;
-          const email = (form.elements.namedItem('email') as HTMLInputElement).value;
-          const password = (form.elements.namedItem('password') as HTMLInputElement).value;
-          try {
-            const res = await fetch('/api/signin', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, password })
-            });
-            const data = await res.json();
-            if (res.ok) {
-              setMessage('Sign in successful! Redirecting...');
-              if (data.fullName) {
-                localStorage.setItem('userName', data.fullName);
-                if (email) localStorage.setItem('userEmail', email);
-              }
-              router.push('/doctor');
-            } else {
-              setMessage(data.error || 'Sign in failed.');
-            }
-          } catch (err) {
-            setMessage('Something went wrong.');
-          }
-        }}>
+        {error && (
+          <div style={{
+            padding: '12px',
+            background: '#f87171',
+            color: '#fff',
+            borderRadius: '6px',
+            marginBottom: '16px',
+            fontSize: '14px',
+            width: '100%',
+            textAlign: 'center'
+          }}>
+            {error}
+          </div>
+        )}
+        <form style={{width: "100%"}} onSubmit={handleSubmit}>
           <label className="login-label" htmlFor="email" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, marginTop: 18, fontWeight: 500, display: "block"}}>Enter your E-mail</label>
-          <div className="input-group" style={{width: "100%", marginBottom: 8}}>
+          <div style={{width: "100%", marginBottom: 16}}>
             <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: 24, border: "1px solid #444", padding: "0 16px", height: 44}}>
               <span className="input-icon" style={{color: "#bdbdbd", marginRight: 10, fontSize: "1.1rem"}}>@</span>
-              <input type="email" id="email" name="email" placeholder="helloshivani24@gmail.com" required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0"}} />
+              <input type="email" id="email" name="email" placeholder="your@email.com" value={formData.email} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0"}} />
             </div>
           </div>
-          <label className="login-label" htmlFor="password" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, marginTop: 18, fontWeight: 500, display: "block"}}>Enter your Password</label>
-          <div className="input-group" style={{width: "100%", marginBottom: 24}}>
+          <label className="login-label" htmlFor="password" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, fontWeight: 500, display: "block"}}>Enter your Password</label>
+          <div style={{width: "100%", marginBottom: 16}}>
             <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: 24, border: "1px solid #444", padding: "0 16px", height: 44}}>
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
                 name="password"
                 placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
                 required
                 style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0"}}
               />
@@ -105,20 +144,23 @@ export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
               </button>
             </div>
           </div>
-          <button className="login-btn" type="submit" style={{width: "100%", background: "#6c63ff", color: "#fff", border: "none", borderRadius: 24, padding: "12px 0", fontSize: "1.1rem", fontWeight: 600, marginTop: 18, marginBottom: 10, cursor: "pointer", transition: "background 0.2s"}}>Get Started</button>
-          {message && (
-            <div style={{ color: message.includes('successful') ? '#10b981' : '#f87171', textAlign: 'center', marginTop: 8, fontSize: '1rem', fontWeight: 500 }}>
-              {message}
+           <div>
+            <label className="input-label" htmlFor="role" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, fontWeight: 500, display: "block"}}>Select Role</label>
+            <div style={{width: "100%", marginBottom: 24}}>
+              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: 24, border: "1px solid #444", padding: "0 16px", height: 44}}>
+                 <span className="input-icon" style={{color: "#bdbdbd", marginRight: 10, fontSize: "1.1rem"}}>👥</span>
+                <select id="role" name="role" value={formData.role} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0", appearance: 'none'}}> 
+                  <option value="patient" style={{backgroundColor: "#2d2d3a", color: "#fff"}}>Patient</option>
+                  <option value="doctor" style={{backgroundColor: "#2d2d3a", color: "#fff"}}>Doctor</option>
+                </select>
+              </div>
             </div>
-          )}
+          </div>
+          <button className="login-btn" type="submit" style={{width: "100%", background: "#6c63ff", color: "#fff", border: "none", borderRadius: 24, padding: "12px 0", fontSize: "1.1rem", fontWeight: 600, cursor: "pointer", transition: "background 0.2s"}}>Get Started</button>
         </form>
-        <div className="signup-link" style={{color: "#bdbdbd", fontSize: "0.98rem", textAlign: "center", marginTop: 8}}>
-          Don't have an Account?
-          {onSwitchToSignUp ? (
-            <button type="button" onClick={onSwitchToSignUp} style={{color: "#fff", fontSize: "16px",textDecoration: "none", marginLeft: 4, background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "Montserrat, Arial, sans-serif"}}>Sign up</button>
-          ) : (
-            <a href="/signup" style={{color: "#fff", textDecoration: "underline", marginLeft: 4}}>Sign up</a>
-          )}
+        <div className="signup-link" style={{color: "#bdbdbd", fontSize: "0.98rem", textAlign: "center", marginTop: 24}}>
+          Don't have an Account?{' '}
+          <Link href="/auth/signup" style={{color: "#fff", textDecoration: "underline", marginLeft: 4}}>Sign up</Link>
         </div>
       </div>
     </div>

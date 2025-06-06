@@ -3,35 +3,47 @@ import clientPromise from '../mongodb';
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const patientName = formData.get('patientName');
-    const age = formData.get('age');
-    const bloodGroup = formData.get('bloodGroup');
-    const fileName = formData.get('fileName');
-    const file = formData.get('file');
+    const body = await request.json();
+    const {
+      patientName,
+      age,
+      gender,
+      bloodGroup,
+      doctorName,
+      date,
+      disease,
+      notes,
+      medicines,
+      createdAt
+    } = body;
 
-    if (!patientName || !fileName || !file) {
+    if (!patientName) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const client = await clientPromise;
     const db = client.db('prescriptionApp');
 
-    const reportData = {
+    const prescriptionData = {
       patientName,
-      age: age || 'Unknown',
-      bloodGroup: bloodGroup || 'Unknown',
-      fileName,
-      file, // Assuming file is stored as binary or base64
-      uploadedAt: new Date(),
+      age: age || '',
+      gender: gender || '',
+      bloodGroup: bloodGroup || '',
+      doctorName: doctorName || '',
+      date: date || '',
+      disease: disease || '',
+      notes: notes || '',
+      medicines: Array.isArray(medicines) ? medicines : [],
+      createdAt: createdAt ? new Date(createdAt) : new Date(),
     };
 
-    const result = await db.collection('reports').insertOne(reportData);
+    const result = await db.collection('prescriptions').insertOne(prescriptionData);
 
-    return NextResponse.json({ message: 'Report uploaded successfully', id: result.insertedId }, { status: 201 });
+    return NextResponse.json({ message: 'Prescription uploaded successfully', id: result.insertedId }, { status: 201 });
   } catch (error) {
-    console.error('Error uploading report:', error);
-    return NextResponse.json({ error: 'Failed to upload report' }, { status: 500 });
+    console.error('Error uploading prescription:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    return NextResponse.json({ error: 'Failed to upload prescription', details: errorMessage }, { status: 500 });
   }
 }
 

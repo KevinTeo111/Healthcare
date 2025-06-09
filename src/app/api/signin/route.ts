@@ -26,8 +26,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       message: 'Sign in successful', 
-      name: user.name || user.fullName,
-      fullName: user.fullName || user.name,
+      name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.fullName || user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      fullName: user.fullName || (user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name),
       email: user.email,
       role: user.role
     }, { status: 200 });

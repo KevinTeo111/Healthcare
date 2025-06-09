@@ -16,9 +16,12 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    // Support both {fullName, email, password} and {name, email, password}
+    
+    const firstName = user.firstName || (user.fullName ? user.fullName.split(' ')[0] : user.name ? user.name.split(' ')[0] : '');
+
     return NextResponse.json({
       name: user.name || user.fullName || '',
+      firstName: firstName,
       email: user.email || '',
       password: user.password || '',
     });

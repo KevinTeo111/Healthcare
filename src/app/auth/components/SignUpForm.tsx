@@ -2,18 +2,22 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRef, useEffect } from "react";
 
 interface SignUpFormProps {}
 
 export default function SignUpForm({}: SignUpFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     role: 'patient' // Default role
   });
   const [error, setError] = useState<string | null>(null);
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +38,7 @@ export default function SignUpForm({}: SignUpFormProps) {
       const data = await res.json();
 
       // Store user info in localStorage
-      localStorage.setItem('userName', data.name || formData.fullName);
+      localStorage.setItem('userName', `${formData.firstName} ${formData.lastName}`);
       localStorage.setItem('userEmail', data.email);
       localStorage.setItem('userRole', data.role);
 
@@ -53,6 +57,24 @@ export default function SignUpForm({}: SignUpFormProps) {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+
+  const handleRoleSelect = (role: string) => {
+    setFormData(prev => ({ ...prev, role }));
+    setIsRoleDropdownOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsRoleDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownRef]);
 
   return (
     <div style={{
@@ -108,11 +130,20 @@ export default function SignUpForm({}: SignUpFormProps) {
         )}
         <form style={{width: "100%"}} onSubmit={handleSubmit}>
           <div>
-            <label className="input-label" htmlFor="fullName" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, marginTop: 18, fontWeight: 500, display: "block"}}>Enter your Name</label>
+            <label className="input-label" htmlFor="firstName" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, marginTop: 18, fontWeight: 500, display: "block"}}>First Name</label>
             <div style={{width: "100%", marginBottom: 16}}>
               <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: 24, border: "1px solid #444", padding: "0 16px", height: 44}}>
                 <span className="input-icon" style={{color: "#bdbdbd", marginRight: 10, fontSize: "1.1rem"}}>👤</span>
-                <input type="text" id="fullName" name="fullName" placeholder="Your Name" value={formData.fullName} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0"}} />
+                <input type="text" id="firstName" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0"}} />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className="input-label" htmlFor="lastName" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, marginTop: 18, fontWeight: 500, display: "block"}}>Last Name</label>
+            <div style={{width: "100%", marginBottom: 16}}>
+              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: 24, border: "1px solid #444", padding: "0 16px", height: 44}}>
+                <span className="input-icon" style={{color: "#bdbdbd", marginRight: 10, fontSize: "1.1rem"}}>👤</span>
+                <input type="text" id="lastName" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0"}} />
               </div>
             </div>
           </div>
@@ -134,16 +165,71 @@ export default function SignUpForm({}: SignUpFormProps) {
               </div>
             </div>
           </div>
-           <div>
+          <div>
             <label className="input-label" htmlFor="role" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, fontWeight: 500, display: "block"}}>Select Role</label>
-            <div style={{width: "100%", marginBottom: 24}}>
-              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: 24, border: "1px solid #444", padding: "0 16px", height: 44}}>
+            <div style={{width: "100%", marginBottom: 24, position: 'relative'}} ref={dropdownRef}>
+              <div
+                className="input-wrapper"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  background: "rgba(255,255,255,0.08)",
+                  borderRadius: 24,
+                  border: "1px solid #444",
+                  padding: "0 16px",
+                  height: 44,
+                  cursor: 'pointer',
+                  justifyContent: 'space-between'
+                }}
+                onClick={() => setIsRoleDropdownOpen(prev => !prev)}
+              >
                  <span className="input-icon" style={{color: "#bdbdbd", marginRight: 10, fontSize: "1.1rem"}}>👥</span>
-                <select id="role" name="role" value={formData.role} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0", appearance: 'none'}}> 
-                  <option value="patient" style={{backgroundColor: "#2d2d3a", color: "#fff"}}>Patient</option>
-                  <option value="doctor" style={{backgroundColor: "#2d2d3a", color: "#fff"}}>Doctor</option>
-                </select>
+                <span style={{color: "#fff", fontSize: "1rem", flexGrow: 1}}>
+                  {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
+                </span>
+                <span style={{color: "#bdbdbd", fontSize: "0.8rem"}}>{isRoleDropdownOpen ? '▲' : '▼'}</span>
               </div>
+              {isRoleDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 8px)',
+                  left: 0,
+                  right: 0,
+                  background: "#2d2d3a",
+                  borderRadius: 8,
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+                  zIndex: 10,
+                  overflow: 'hidden'
+                }}>
+                  <div
+                    style={{
+                      padding: '12px 16px',
+                      color: "#fff",
+                      cursor: "pointer",
+                      backgroundColor: formData.role === 'patient' ? 'rgba(255,255,255,0.1)' : 'transparent',
+                      borderBottom: '1px solid #444'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = formData.role === 'patient' ? 'rgba(255,255,255,0.1)' : 'transparent'}
+                    onClick={() => handleRoleSelect('patient')}
+                  >
+                    Patient
+                  </div>
+                  <div
+                    style={{
+                      padding: '12px 16px',
+                      color: "#fff",
+                      cursor: "pointer",
+                      backgroundColor: formData.role === 'doctor' ? 'rgba(255,255,255,0.1)' : 'transparent',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = formData.role === 'doctor' ? 'rgba(255,255,255,0.1)' : 'transparent'}
+                    onClick={() => handleRoleSelect('doctor')}
+                  >
+                    Doctor
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <button className="signup-btn" type="submit" style={{width: "100%", background: "#6c63ff", color: "#fff", border: "none", borderRadius: 24, padding: "12px 0", fontSize: "1.1rem", fontWeight: 600, cursor: "pointer", transition: "background 0.2s"}}>Sign Up</button>

@@ -4,10 +4,10 @@ import clientPromise from '../../mongodb';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { requestId: string } }
+  context: { params: { requestId: string } }
 ) {
   try {
-    const { requestId } = params;
+    const { requestId } = context.params;
     const { status } = await request.json();
 
     // Basic validation for status

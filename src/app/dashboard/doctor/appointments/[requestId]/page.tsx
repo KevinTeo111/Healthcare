@@ -107,6 +107,13 @@ export default function AppointmentDetailsPage({ params }: { params: { requestId
       });
 
       router.push('/dashboard/doctor/appointments');
+      // Reset prescription form fields after successful submission
+      setPrescription({
+        disease: '',
+        medicines: [],
+        notes: '',
+      });
+      setNewMedicine({ name: '', quantity: '' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save prescription');
     } finally {

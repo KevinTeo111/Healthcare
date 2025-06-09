@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
+import * as XLSX from 'xlsx';
+import Papa from 'papaparse';
 
 export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -10,6 +12,9 @@ export default function AdminPage() {
   const [newUser, setNewUser] = useState<any>({ name: '', email: '', password: '' });
   const [addMode, setAddMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [showAuditLogs, setShowAuditLogs] = useState(false);
+  const [backupData, setBackupData] = useState<any>(null);
 
   const fetchUsers = async () => {
     try {
@@ -128,9 +133,181 @@ export default function AdminPage() {
     setAddMode(false);
   };
 
+  // Data Management Functions
+  const exportToCSV = () => {
+    const csv = Papa.unparse(users);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `users_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    logAuditAction('export', 'CSV export of users');
+  };
+
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(users);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Users');
+    XLSX.writeFile(wb, `users_${new Date().toISOString().split('T')[0]}.xlsx`);
+    logAuditAction('export', 'Excel export of users');
+  };
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const text = e.target?.result as string;
+        const results = Papa.parse(text, { header: true });
+        const importedUsers = results.data as any[];
+        
+        // Validate imported data
+        const validUsers = importedUsers.filter(user => user.email && user.name);
+        
+        // Add users through API
+        for (const user of validUsers) {
+          await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user),
+          });
+        }
+        
+        await fetchUsers();
+        logAuditAction('import', `Imported ${validUsers.length} users`);
+        alert(`Successfully imported ${validUsers.length} users`);
+      } catch (error) {
+        alert('Error importing users: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const createBackup = () => {
+    const backup = {
+      users,
+      timestamp: new Date().toISOString(),
+      version: '1.0'
+    };
+    setBackupData(backup);
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `backup_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    logAuditAction('backup', 'Created system backup');
+  };
+
+  const handleRestore = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const backup = JSON.parse(e.target?.result as string);
+        if (!backup.users || !Array.isArray(backup.users)) {
+          throw new Error('Invalid backup file format');
+        }
+
+        // Restore users
+        for (const user of backup.users) {
+          await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(user),
+          });
+        }
+
+        await fetchUsers();
+        logAuditAction('restore', 'Restored system from backup');
+        alert('System restored successfully');
+      } catch (error) {
+        alert('Error restoring backup: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const logAuditAction = (action: string, details: string) => {
+    const log = {
+      action,
+      details,
+      timestamp: new Date().toISOString(),
+      user: 'admin' // In a real app, this would be the logged-in admin's info
+    };
+    setAuditLogs(prev => [log, ...prev]);
+  };
+
+  // Add this before the return statement
+  useEffect(() => {
+    // Log initial page load
+    logAuditAction('view', 'Admin page accessed');
+  }, []);
+
   return (
     <div style={{ minHeight: '100vh', background: '#f7faff', fontFamily: 'Segoe UI, Arial, sans-serif', padding: 32 }}>
       <h1 style={{ fontWeight: 700, fontSize: 28, color: '#2563eb', marginBottom: 24 }}>Admin Panel</h1>
+      
+      {/* Data Management Controls */}
+      <div style={{ marginBottom: 24, display: 'flex', gap: 12 }}>
+        <button onClick={exportToCSV} style={{ background: '#2563eb', color: 'white', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer' }}>
+          Export CSV
+        </button>
+        <button onClick={exportToExcel} style={{ background: '#2563eb', color: 'white', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer' }}>
+          Export Excel
+        </button>
+        <label style={{ background: '#2563eb', color: 'white', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer' }}>
+          Import Users
+          <input type="file" accept=".csv,.xlsx" onChange={handleFileImport} style={{ display: 'none' }} />
+        </label>
+        <button onClick={createBackup} style={{ background: '#2563eb', color: 'white', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer' }}>
+          Create Backup
+        </button>
+        <label style={{ background: '#2563eb', color: 'white', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer' }}>
+          Restore Backup
+          <input type="file" accept=".json" onChange={handleRestore} style={{ display: 'none' }} />
+        </label>
+        <button onClick={() => setShowAuditLogs(!showAuditLogs)} style={{ background: '#2563eb', color: 'white', border: 'none', borderRadius: 4, padding: '8px 16px', cursor: 'pointer' }}>
+          {showAuditLogs ? 'Hide Audit Logs' : 'Show Audit Logs'}
+        </button>
+      </div>
+
+      {/* Audit Logs Section */}
+      {showAuditLogs && (
+        <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: 24, marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 600, marginBottom: 16, color: '#1e293b' }}>Audit Logs</h2>
+          <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#f1f5f9' }}>
+                  <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #e5e7eb' }}>Timestamp</th>
+                  <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #e5e7eb' }}>Action</th>
+                  <th style={{ textAlign: 'left', padding: 8, borderBottom: '1px solid #e5e7eb' }}>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {auditLogs.map((log, index) => (
+                  <tr key={index}>
+                    <td style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
+                      {new Date(log.timestamp).toLocaleString()}
+                    </td>
+                    <td style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
+                      {log.action}
+                    </td>
+                    <td style={{ padding: 8, borderBottom: '1px solid #f1f5f9' }}>
+                      {log.details}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: 24, maxWidth: 700 }}>
         <h2 style={{ fontSize: 22, fontWeight: 600, marginBottom: 16, color: '#1e293b' }}>Users List</h2>
         {error && (

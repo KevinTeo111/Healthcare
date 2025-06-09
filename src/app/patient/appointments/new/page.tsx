@@ -71,70 +71,89 @@ export default function BookAppointmentPage() {
 
   return (
     <div style={{
-      padding: '32px',
       background: '#f7faff',
       minHeight: '100vh',
-      fontFamily: 'Segoe UI, Arial, sans-serif'
+      fontFamily: 'Segoe UI, Arial, sans-serif',
     }}>
-      <h1 style={{ fontWeight: 700, fontSize: 28, color: '#2563eb', marginBottom: 24 }}>Book New Appointment</h1>
-      <div style={{ background: 'white', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: 24, maxWidth: 600 }}>
-        {error && (
-          <div style={{ color: '#ef4444', marginBottom: 16 }}>{error}</div>
-        )}
-        {success && (
-          <div style={{ color: '#10b981', marginBottom: 16 }}>{success}</div>
-        )}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <h3>Patient Details</h3>
-          <div>
-            <label htmlFor="patientName" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Patient Name:</label>
-            <input type="text" id="patientName" name="patientName" value={formData.patientName} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
-          </div>
-           <div>
-            <label htmlFor="patientAge" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Age:</label>
-            <input type="number" id="patientAge" name="patientAge" value={formData.patientAge} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
-          </div>
-          <div>
-            <label htmlFor="patientGender" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Gender:</label>
-            <select id="patientGender" name="patientGender" value={formData.patientGender} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="patientBloodGroup" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Blood Group:</label>
-            <input type="text" id="patientBloodGroup" name="patientBloodGroup" value={formData.patientBloodGroup} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
-          </div>
+      {/* This div acts as the main content wrapper, handling max-width, centering, and padding */}
+      <div style={{
+        margin: '0 300px', // Center the content block horizontally
+        padding: '50px', // Consistent padding around the content block
+      }}>
+        <h1 style={{
+          fontWeight: 700,
+          fontSize: 28,
+          color: '#2563eb',
+          marginBottom: 24,
+          textAlign: 'center',
+          width: '100%', // Title stretches to fill the content wrapper
+        }}>Book New Appointment</h1>
 
-          <h3 style={{ marginTop: '24px' }}>Appointment Details</h3>
-          <div>
-            <label htmlFor="preferredDate" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Preferred Date:</label>
-            <input type="date" id="preferredDate" name="preferredDate" value={formData.preferredDate} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
-          </div>
-          <div>
-            <label htmlFor="preferredTime" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Preferred Time:</label>
-            <input type="time" id="preferredTime" name="preferredTime" value={formData.preferredTime} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
-          </div>
-           <div>
-            <label htmlFor="notes" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Notes (Optional):</label>
-            <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px', minHeight: '80px' }} />
-          </div>
+        <div style={{
+          background: 'white',
+          borderRadius: 12,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          padding: 24, // Internal padding for form fields
+          width: '100%', // Form stretches to fill the content wrapper
+        }}>
+          {error && (
+            <div style={{ color: '#ef4444', marginBottom: 16 }}>{error}</div>
+          )}
+          {success && (
+            <div style={{ color: '#10b981', marginBottom: 16 }}>{success}</div>
+          )}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h3>Patient Details</h3>
+            <div>
+              <label htmlFor="patientName" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Patient Name:</label>
+              <input type="text" id="patientName" name="patientName" value={formData.patientName} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
+            </div>
+             <div>
+              <label htmlFor="patientAge" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Age:</label>
+              <input type="number" id="patientAge" name="patientAge" value={formData.patientAge} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
+            </div>
+            <div>
+              <label htmlFor="patientGender" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Gender:</label>
+              <select id="patientGender" name="patientGender" value={formData.patientGender} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }}>
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="patientBloodGroup" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Blood Group:</label>
+              <input type="text" id="patientBloodGroup" name="patientBloodGroup" value={formData.patientBloodGroup} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
+            </div>
 
-          <button type="submit" disabled={loading} style={{
-            padding: '10px 20px',
-            background: loading ? '#9ca3af' : '#2563eb',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            fontWeight: '600',
-            marginTop: '24px'
-          }}>
-            {loading ? 'Submitting Request...' : 'Submit Appointment Request'}
-          </button>
-        </form>
+            <h3 style={{ marginTop: '24px' }}>Appointment Details</h3>
+            <div>
+              <label htmlFor="preferredDate" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Preferred Date:</label>
+              <input type="date" id="preferredDate" name="preferredDate" value={formData.preferredDate} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
+            </div>
+            <div>
+              <label htmlFor="preferredTime" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Preferred Time:</label>
+              <input type="time" id="preferredTime" name="preferredTime" value={formData.preferredTime} onChange={handleChange} required style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
+            </div>
+             <div>
+              <label htmlFor="notes" style={{ display: 'block', marginBottom: '8px', color: '#1e293b' }}>Notes (Optional):</label>
+              <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} style={{ width: '100%', padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px', minHeight: '80px' }} />
+            </div>
+
+            <button type="submit" disabled={loading} style={{
+              padding: '10px 20px',
+              background: loading ? '#9ca3af' : '#2563eb',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              fontWeight: '600',
+              marginTop: '24px'
+            }}>
+              {loading ? 'Submitting Request...' : 'Submit Appointment Request'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

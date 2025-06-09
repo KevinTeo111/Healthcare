@@ -14,6 +14,8 @@ interface PatientDetails {
 }
 
 interface UserData {
+  firstName: string;
+  lastName: string;
   fullName: string;
   email: string;
   role: string;
@@ -83,14 +85,14 @@ const Navbar: React.FC = () => {
           Patient Portal
         </div>
         <div style={{ display: 'flex', gap: '16px', marginLeft: 'auto', alignItems: 'center' }}>
-          {userData?.fullName && (
+          {userData?.firstName && (
             <div style={{ 
               color: '#1e293b',
               fontWeight: 500,
               fontSize: '16px',
               marginRight: '16px'
             }}>
-              Welcome, {userData.fullName}
+              Welcome, {userData.firstName}
             </div>
           )}
           <button
@@ -160,18 +162,34 @@ const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, c
 const PatientDashboard: React.FC = () => {
   const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [previousAppointments, setPreviousAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const response = await fetch('/api/appointment-requests');
-        if (!response.ok) {
+        const userEmail = localStorage.getItem('userEmail');
+        if (!userEmail) {
+          throw new Error('User not logged in');
+        }
+
+        const [appointmentsRes, previousRes] = await Promise.all([
+          fetch('/api/appointment-requests'),
+          fetch(`/api/appointments/previous?email=${userEmail}`)
+        ]);
+
+        if (!appointmentsRes.ok || !previousRes.ok) {
           throw new Error('Failed to fetch appointments');
         }
-        const data = await response.json();
-        setAppointments(data);
+
+        const [appointmentsData, previousData] = await Promise.all([
+          appointmentsRes.json(),
+          previousRes.json()
+        ]);
+
+        setAppointments(appointmentsData);
+        setPreviousAppointments(previousData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -248,7 +266,7 @@ const PatientDashboard: React.FC = () => {
 
           {appointments.length === 0 ? (
             <p style={{ color: '#64748b', textAlign: 'center', padding: '24px 0' }}>
-              No appointments found. Book your first appointment!
+              No upcoming appointments. Book your first appointment!
             </p>
           ) : (
             <div style={{ display: 'grid', gap: '16px' }}>
@@ -265,10 +283,10 @@ const PatientDashboard: React.FC = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <p style={{ fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}>
-                        Dr. {appointment.doctorName}
+                        Dr. {appointment.doctorName || 'Ketan Patel'}
                       </p>
                       <p style={{ color: '#64748b', marginBottom: '4px' }}>
-                        {new Date(appointment.preferredDate).toLocaleDateString()} at {appointment.preferredTime}
+                        {new Date(appointment.preferredDate).toLocaleDateString('en-GB')} at {appointment.preferredTime}
                       </p>
                       <p style={{ 
                         color: appointment.status === 'accepted' ? '#10b981' : 
@@ -279,7 +297,7 @@ const PatientDashboard: React.FC = () => {
                         {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                       </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div>
                       {appointment.status === 'pending' && (
                         <button
                           onClick={() => router.push(`/patient/appointments/${appointment._id}/edit`)}
@@ -290,7 +308,8 @@ const PatientDashboard: React.FC = () => {
                             border: 'none',
                             borderRadius: '4px',
                             cursor: 'pointer',
-                            fontSize: '14px'
+                            fontSize: '14px',
+                            marginRight: '8px'
                           }}
                         >
                           Edit
@@ -325,6 +344,52 @@ const PatientDashboard: React.FC = () => {
                         </button>
                       )}
                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Previous Appointments Card */}
+        <div style={{ 
+          background: 'white', 
+          borderRadius: 12, 
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)', 
+          padding: 24 
+        }}>
+          <h2 style={{ color: '#1e293b', marginBottom: 16 }}>Previous Appointments</h2>
+          {previousAppointments.length === 0 ? (
+            <p style={{ color: '#64748b', textAlign: 'center', padding: '24px 0' }}>
+              No previous appointments found.
+            </p>
+          ) : (
+            <div style={{ display: 'grid', gap: '16px' }}>
+              {previousAppointments.map((appointment) => (
+                <div
+                  key={appointment._id}
+                  style={{
+                    padding: '16px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    background: '#f8fafc'
+                  }}
+                >
+                  <div>
+                    <p style={{ fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}>
+                      Dr. {appointment.doctorName || 'Ketan Patel'}
+                    </p>
+                    <p style={{ color: '#64748b', marginBottom: '4px' }}>
+                      {new Date(appointment.preferredDate).toLocaleDateString('en-GB')} at {appointment.preferredTime}
+                    </p>
+                    <p style={{ 
+                      color: appointment.status === 'accepted' ? '#10b981' : 
+                             appointment.status === 'rejected' ? '#ef4444' : 
+                             '#f59e0b',
+                      fontWeight: 500
+                    }}>
+                      {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                    </p>
                   </div>
                 </div>
               ))}

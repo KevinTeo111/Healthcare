@@ -103,7 +103,7 @@ const Topbar: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
     const localName = localStorage.getItem('userName');
     const localEmail = localStorage.getItem('userEmail');
     if (localName) {
-      setUserName(localName);
+      setUserName(localName.split(' ')[0]); // Split and take the first name
     }
     const fetchUser = async () => {
       try {
@@ -112,7 +112,7 @@ const Topbar: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
         const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch user');
         const data = await res.json();
-        setUserName(data.name);
+        setUserName(data.firstName || data.name.split(' ')[0]);
         localStorage.setItem('userName', data.name || 'Guest');
       } catch {
         setUserName('Guest');
@@ -223,9 +223,9 @@ const Topbar: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
           boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
         }}>
           <ul style={{ listStyle: 'none', margin: 0, padding: 8 }}>
-            {searchResults.map((result, idx) => (
+            {searchResults.map((result) => (
               <li
-                key={idx}
+                key={result.id}
                 style={{ padding: 8, borderBottom: '1px solid #f1f5f9', cursor: 'pointer' }}
                 onClick={() => {
                   if (result.type === 'patient') {
@@ -312,20 +312,6 @@ const DashboardNew: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
 
-  // Fetch prescriptions on mount
-  useEffect(() => {
-    setLoadingPrescriptions(true);
-    fetch('/api/prescriptions')
-      .then((res) => res.json())
-      .then((data) => {
-        setPrescriptions(Array.isArray(data) ? data : []);
-        setLoadingPrescriptions(false);
-      })
-      .catch(() => setLoadingPrescriptions(false));
-  }, []);
-
-  const memoizedPrescriptions = useMemo(() => prescriptions, [prescriptions]);
-
   // Real-time notifications & Appointment Requests via polling
   useEffect(() => {
     const fetchNotificationsAndRequests = async () => {
@@ -337,6 +323,11 @@ const DashboardNew: React.FC = () => {
         // Fetch pending appointment requests
         const appointmentRequestsRes = await fetch('/api/appointment-requests');
         const pendingRequests = appointmentRequestsRes.ok ? await appointmentRequestsRes.json() : [];
+
+        // Fetch prescriptions
+        const prescriptionsRes = await fetch('/api/prescriptions');
+        const fetchedPrescriptions = prescriptionsRes.ok ? await prescriptionsRes.json() : [];
+        setPrescriptions(Array.isArray(fetchedPrescriptions) ? fetchedPrescriptions : []);
 
         const now = new Date();
 
@@ -351,8 +342,8 @@ const DashboardNew: React.FC = () => {
         }));
 
          // Format prescription notifications
-         const prescriptionNotifications = memoizedPrescriptions.map((prescription, idx) => ({
-          id: `prescription-${prescription._id || idx + 1}`,
+         const prescriptionNotifications = fetchedPrescriptions.map((prescription: any) => ({
+          id: `prescription-${prescription._id}`,
           type: 'prescription',
           message: `Patient ${prescription.patientName} was prescribed for ${prescription.disease}.`,
           time: prescription.createdAt ? new Date(prescription.createdAt).toLocaleTimeString() : 'Just now',
@@ -376,10 +367,11 @@ const DashboardNew: React.FC = () => {
       }
     };
 
+    setLoadingPrescriptions(true); // Indicate loading before initial fetch
     fetchNotificationsAndRequests();
     const interval = setInterval(fetchNotificationsAndRequests, 30000); 
     return () => clearInterval(interval);
-  }, [memoizedPrescriptions]);
+  }, []);
 
   // Handle accepting or rejecting appointment requests from notifications
   const handleRequestAction = async (requestId: string, status: 'accepted' | 'rejected') => {
@@ -546,15 +538,16 @@ const DashboardNew: React.FC = () => {
                       <strong>Prescriptions:</strong>
                       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                         {selectedPatient.prescriptions.map((pres: any, idx: number) => (
-                          <li key={idx} style={{ marginBottom: 12, padding: 12, background: '#f9fafb', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                          <li key={pres._id} style={{ marginBottom: 12, padding: 12, background: '#f9fafb', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
                             <div><strong>Date:</strong> {pres.date || '-'}</div>
                             <div><strong>Medicines:</strong> {Array.isArray(pres.medicines) && pres.medicines.length > 0 ? (
                               pres.medicines.map((med: any, i: number) => (
-                                <span key={i}>
+                                <span key={med.name + '-' + i}>
                                   {med.name ? med.name : typeof med === 'string' ? med : ''}{med.quantity ? ` x${med.quantity}` : ''}{i < pres.medicines.length - 1 ? ', ' : ''}
                                 </span>
                               ))
                             ) : '-'}</div>
+                            {pres.disease && <div style={{ marginBottom: '4px' }}><strong>Diagnosis:</strong> {pres.disease}</div>}
                             <div><strong>Notes:</strong> {pres.notes ? pres.notes : '-'}</div>
                           </li>
                         ))}

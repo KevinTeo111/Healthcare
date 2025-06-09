@@ -5,7 +5,9 @@ import { ObjectId, WithId, Document } from 'mongodb';
 
 interface User {
   _id: ObjectId;
-  name: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
   email: string;
   role: string;
   createdAt: string;
@@ -42,7 +44,9 @@ export async function GET() {
         try {
           return {
             _id: user._id,
-            name: user.fullName as string || '',
+            firstName: user.firstName as string || '',
+            lastName: user.lastName as string || '',
+            fullName: user.fullName as string || '',
             email: user.email as string || '',
             role: user.role as string || 'patient', // Default to patient if role is missing
             createdAt: user.createdAt as string || new Date().toISOString()

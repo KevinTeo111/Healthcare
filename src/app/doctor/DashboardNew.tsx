@@ -406,15 +406,16 @@ const DashboardNew: React.FC = () => {
     }
     // Search patients from prescriptions
     const uniquePatients = Array.from(
-      new Set(prescriptions.map((p: any) => `${p.patientName}|${p.age || '-'}|${p.gender || '-'}|${p.bloodGroup || '-'}`))
+      new Set(prescriptions.map((p: any) => `${p.patientName}|${p.age || '-'}|${p.gender || '-'}|${p.bloodGroup || '-'}|${p.caseNumber || '-'}`))
     ).map(key => {
-      const [name, age, gender, bloodGroup] = key.split('|');
+      const [name, age, gender, bloodGroup, caseNumber] = key.split('|');
       // Find the latest prescription for this patient
       const latest = prescriptions.find((p: any) =>
         p.patientName === name &&
         String(p.age || '-') === age &&
         String(p.gender || '-') === gender &&
-        String(p.bloodGroup || '-') === bloodGroup
+        String(p.bloodGroup || '-') === bloodGroup &&
+        String(p.caseNumber || '-') === caseNumber
       );
       return {
         id: key,
@@ -422,18 +423,22 @@ const DashboardNew: React.FC = () => {
         age,
         gender,
         bloodGroup,
+        caseNumber,
       };
     });
     setPatientResults(
-      uniquePatients.filter(p => p.name.toLowerCase().includes(value.toLowerCase()))
+      uniquePatients.filter(p => 
+        p.name.toLowerCase().includes(value.toLowerCase()) ||
+        p.caseNumber.toLowerCase().includes(value.toLowerCase())
+      )
     );
   };
 
   // Simulate selecting a patient
   const handleSelectPatient = (patient: any) => {
-    // Filter all prescriptions for this patient (match only by patientName)
+    // Filter all prescriptions for this patient (match only by patientName and caseNumber)
     const patientPrescriptions = prescriptions.filter((p: any) =>
-      p.patientName === patient.name
+      p.patientName === patient.name && p.caseNumber === patient.caseNumber
     );
     setSelectedPatient({
       ...patient,
@@ -451,6 +456,7 @@ const DashboardNew: React.FC = () => {
         bloodGroup: pres.bloodGroup || '-',
         doctorName: pres.doctorName || '',
         createdAt: pres.createdAt || '',
+        caseNumber: pres.caseNumber || '',
       })),
     });
     setPatientSearch('');
@@ -486,13 +492,27 @@ const DashboardNew: React.FC = () => {
                   style={{ padding: 8, borderRadius: 8, border: '1px solid #cbd5e1', fontSize: 16, width: '100%' }}
                 />
                 {patientResults.length > 0 && (
-                  <ul style={{ listStyle: 'none', margin: 0, padding: 0, background: '#f9fafb', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', position: 'absolute', zIndex: 10, width: '90%' }}>
-                    {patientResults.map(p => (
-                      <li key={p.id} style={{ padding: 8, borderBottom: '1px solid #e5e7eb', cursor: 'pointer' }} onClick={() => handleSelectPatient(p)}>
-                        {p.name} (Age: {p.age})
-                      </li>
-                    ))}
-                  </ul>
+                  <div style={{ maxHeight: 400, overflowY: 'auto', marginTop: 8 }}>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                      {patientResults.map(p => (
+                        <li
+                          key={p.id}
+                          style={{
+                            padding: 8,
+                            borderBottom: '1px solid #e5e7eb',
+                            cursor: 'pointer',
+                            background: '#f9fafb',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseOver={e => (e.currentTarget.style.background = '#e0e7ff')}
+                          onMouseOut={e => (e.currentTarget.style.background = '#f9fafb')}
+                          onClick={() => handleSelectPatient(p)}
+                        >
+                          {p.caseNumber ? `[Case #${p.caseNumber}] ` : ''}{p.name} (Age: {p.age})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </div>
               {selectedPatient ? (
@@ -513,6 +533,7 @@ const DashboardNew: React.FC = () => {
                   >
                     Close
                   </button>
+                  <div style={{ marginBottom: 8 }}><strong>Case Number:</strong> {selectedPatient.caseNumber || 'Not Assigned'}</div>
                   <div style={{ marginBottom: 8 }}><strong>Name:</strong> {selectedPatient.name}</div>
                   {selectedPatient.age && selectedPatient.age !== '-' && (
                     <div style={{ marginBottom: 8 }}><strong>Age:</strong> {selectedPatient.age}</div>
@@ -536,22 +557,27 @@ const DashboardNew: React.FC = () => {
                   {selectedPatient.prescriptions && selectedPatient.prescriptions.length > 0 && (
                     <div style={{ marginTop: 16 }}>
                       <strong>Prescriptions:</strong>
-                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                        {selectedPatient.prescriptions.map((pres: any, idx: number) => (
-                          <li key={pres._id} style={{ marginBottom: 12, padding: 12, background: '#f9fafb', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
-                            <div><strong>Date:</strong> {pres.date || '-'}</div>
-                            <div><strong>Medicines:</strong> {Array.isArray(pres.medicines) && pres.medicines.length > 0 ? (
-                              pres.medicines.map((med: any, i: number) => (
-                                <span key={med.name + '-' + i}>
-                                  {med.name ? med.name : typeof med === 'string' ? med : ''}{med.quantity ? ` x${med.quantity}` : ''}{i < pres.medicines.length - 1 ? ', ' : ''}
-                                </span>
-                              ))
-                            ) : '-'}</div>
-                            {pres.disease && <div style={{ marginBottom: '4px' }}><strong>Diagnosis:</strong> {pres.disease}</div>}
-                            <div><strong>Notes:</strong> {pres.notes ? pres.notes : '-'}</div>
-                          </li>
-                        ))}
-                      </ul>
+                      <div style={{ maxHeight: 400, overflowY: 'auto', marginTop: 8 }}>
+                        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                          {selectedPatient.prescriptions.map((pres: any, idx: number) => (
+                            <li key={`prescription-${pres._id || idx}`} style={{ marginBottom: 12, padding: 12, background: '#f9fafb', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <div><strong>Date:</strong> {pres.date || '-'}</div>
+                                <div><strong>Case #:</strong> {pres.caseNumber ? pres.caseNumber : "Not Assigned"}</div>
+                              </div>
+                              <div><strong>Medicines:</strong> {Array.isArray(pres.medicines) && pres.medicines.length > 0 ? (
+                                pres.medicines.map((med: any, i: number) => (
+                                  <span key={`medicine-${pres._id || idx}-${i}`}>
+                                    {med.name ? med.name : typeof med === 'string' ? med : ''}{med.quantity ? ` x${med.quantity}` : ''}{i < pres.medicines.length - 1 ? ', ' : ''}
+                                  </span>
+                                ))
+                              ) : '-'}</div>
+                              {pres.disease && <div style={{ marginBottom: '4px' }}><strong>Diagnosis:</strong> {pres.disease}</div>}
+                              <div><strong>Notes:</strong> {pres.notes ? pres.notes : '-'}</div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -622,6 +648,18 @@ const DashboardNew: React.FC = () => {
           </div>
         </div>
       </div>
+      <style jsx global>{`
+        ul::-webkit-scrollbar {
+          width: 8px;
+        }
+        ul::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 4px;
+        }
+        ul::-webkit-scrollbar-track {
+          background: #f9fafb;
+        }
+      `}</style>
     </div>
   );
 };

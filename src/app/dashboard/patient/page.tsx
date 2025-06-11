@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface PatientDetails {
+  name: string;
   patientName: string;
   age: string;
   gender: string;
@@ -19,6 +20,8 @@ interface UserData {
   fullName: string;
   email: string;
   role: string;
+  age?: string;
+  bloodGroup?: string;
 }
 
 interface Appointment {
@@ -28,6 +31,12 @@ interface Appointment {
   status: string;
   doctorName: string;
   createdAt: string;
+}
+
+interface CaseNumber {
+  caseNumber: string | null;
+  exists: boolean;
+  patientDetails?: PatientDetails;
 }
 
 const Navbar: React.FC = () => {
@@ -163,33 +172,51 @@ const PatientDashboard: React.FC = () => {
   const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [previousAppointments, setPreviousAppointments] = useState<Appointment[]>([]);
+  const [caseNumber, setCaseNumber] = useState<CaseNumber | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchData = async () => {
       try {
         const userEmail = localStorage.getItem('userEmail');
         if (!userEmail) {
           throw new Error('User not logged in');
         }
 
-        const [appointmentsRes, previousRes] = await Promise.all([
-          fetch('/api/appointment-requests'),
-          fetch(`/api/appointments/previous?email=${userEmail}`)
+        // Fetch user data to get the full name and other details
+        const userResponse = await fetch(`/api/users?email=${userEmail}`);
+        if (!userResponse.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+        const userData = await userResponse.json();
+
+        // Build the case number query URL with all available patient details
+        const caseNumberParams = new URLSearchParams({
+          name: userData.fullName
+        });
+        if (userData.age) caseNumberParams.append('age', userData.age);
+        if (userData.bloodGroup) caseNumberParams.append('bloodGroup', userData.bloodGroup);
+
+        const [appointmentsRes, previousRes, caseNumberRes] = await Promise.all([
+          fetch(`/api/appointment-requests?email=${userEmail}&role=patient`),
+          fetch(`/api/appointments/previous?email=${userEmail}`),
+          fetch(`/api/prescriptions/patient-case?${caseNumberParams.toString()}`)
         ]);
 
-        if (!appointmentsRes.ok || !previousRes.ok) {
-          throw new Error('Failed to fetch appointments');
+        if (!appointmentsRes.ok || !previousRes.ok || !caseNumberRes.ok) {
+          throw new Error('Failed to fetch data');
         }
 
-        const [appointmentsData, previousData] = await Promise.all([
+        const [appointmentsData, previousData, caseNumberData] = await Promise.all([
           appointmentsRes.json(),
-          previousRes.json()
+          previousRes.json(),
+          caseNumberRes.json()
         ]);
 
         setAppointments(appointmentsData);
         setPreviousAppointments(previousData);
+        setCaseNumber(caseNumberData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
@@ -197,13 +224,13 @@ const PatientDashboard: React.FC = () => {
       }
     };
 
-    fetchAppointments();
+    fetchData();
   }, []);
 
   if (loading) {
     return (
       <div style={{ padding: '32px', textAlign: 'center' }}>
-        Loading appointments...
+        Loading...
       </div>
     );
   }
@@ -232,6 +259,46 @@ const PatientDashboard: React.FC = () => {
         }}>
           Patient Dashboard
         </h1>
+
+        {/* Case Number Card */}
+        <div style={{ 
+          background: 'white', 
+          borderRadius: 12, 
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)', 
+          padding: 24, 
+          marginBottom: 24 
+        }}>
+          <h2 style={{ color: '#1e293b', marginBottom: 16 }}>Medical History</h2>
+          {caseNumber?.exists ? (
+            <div style={{ 
+              padding: '16px',
+              border: '1px solid #e2e8f0',
+              borderRadius: '8px',
+              background: '#f8fafc'
+            }}>
+              <p style={{ fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}>
+                Case Number: {caseNumber.caseNumber}
+              </p>
+              {caseNumber.patientDetails && (
+                <div style={{ marginTop: '8px' }}>
+                  <p style={{ color: '#64748b', marginBottom: '2px' }}>
+                    Name: {caseNumber.patientDetails.name}
+                  </p>
+                  <p style={{ color: '#64748b', marginBottom: '2px' }}>
+                    Age: {caseNumber.patientDetails.age}
+                  </p>
+                  <p style={{ color: '#64748b' }}>
+                    Blood Group: {caseNumber.patientDetails.bloodGroup}
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p style={{ color: '#64748b', textAlign: 'center', padding: '24px 0' }}>
+              No medical history found.
+            </p>
+          )}
+        </div>
 
         {/* Upcoming Appointments Card */}
         <div style={{ 

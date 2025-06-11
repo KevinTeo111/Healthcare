@@ -36,18 +36,21 @@ export async function GET(request: NextRequest) {
     const db = client.db('prescriptionApp');
     const { searchParams } = new URL(request.url);
     const userEmail = searchParams.get('email');
-    const role = searchParams.get('role'); // New: Get role from query params
+    const role = searchParams.get('role');
 
     let filter: any = {};
     if (userEmail) {
       // If email is provided, filter by requestedBy for the patient view
       filter = { requestedBy: userEmail };
     } else if (role === 'admin') {
-      // If role is admin, fetch all appointments (no status filter)
+      // If role is admin, fetch all appointments
       filter = {};
-    } else {
-      // Default to fetching only pending for the doctor view if no email or admin role
+    } else if (role === 'doctor') {
+      // If role is doctor, fetch only pending appointments
       filter = { status: 'pending' };
+    } else {
+      // If no email or role is provided, return empty array
+      return NextResponse.json([]);
     }
 
     const appointmentRequests = await db.collection('appointmentRequests')

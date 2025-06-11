@@ -38,6 +38,9 @@ const PrescriptionPage: React.FC = () => {
   const [disease, setDisease] = useState('');
   const [customMedicineName, setCustomMedicineName] = useState('');
   const [customMedicineQuantity, setCustomMedicineQuantity] = useState(1);
+  const [caseNumber, setCaseNumber] = useState<string>('');
+  const [isExistingPatient, setIsExistingPatient] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch('/filtered_medicines.json')
@@ -99,7 +102,7 @@ const PrescriptionPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Validate all required fields
-    if (!patientName.trim() || !age.trim() || !gender.trim() || !doctorName.trim() || !date.trim()) {
+    if (!patientName.trim() || !age.trim() || !gender.trim() || !doctorName.trim() || !date.trim() || !caseNumber.trim()) {
       alert('Please fill all required fields.');
       return;
     }
@@ -116,6 +119,7 @@ const PrescriptionPage: React.FC = () => {
       date,
       disease,
       notes,
+      caseNumber,
       medicines: prescriptionMedicines.map(pm => ({
         id: pm.medicine.id,
         name: pm.medicine.name,
@@ -141,7 +145,7 @@ const PrescriptionPage: React.FC = () => {
   };
 
   const savePrescription = async () => {
-    if (!patientName.trim() || !age.trim() || !gender.trim() || !doctorName.trim() || !date.trim()) {
+    if (!patientName.trim() || !age.trim() || !gender.trim() || !doctorName.trim() || !date.trim() || !caseNumber.trim()) {
       alert('Please fill all required fields.');
       return false;
     }
@@ -158,6 +162,7 @@ const PrescriptionPage: React.FC = () => {
       date,
       disease,
       notes,
+      caseNumber,
       medicines: prescriptionMedicines.map(pm => ({
         id: pm.medicine.id,
         name: pm.medicine.name,
@@ -231,6 +236,7 @@ Notes: ${notes}
       </head><body>
       <h1>Prescription</h1>
       <table class="details-table">
+        <tr><td class="section-label">Case Number:</td><td>${caseNumber}</td></tr>
         <tr><td class="section-label">Patient Name:</td><td>${patientName}</td></tr>
         <tr><td class="section-label">Disease:</td><td>${disease || '-'}</td></tr>
         <tr><td class="section-label">Age:</td><td>${age}</td></tr>
@@ -302,6 +308,61 @@ Notes: ${notes}
     setCustomMedicineQuantity(1);
   };
 
+  // Function to check if patient exists and get their case number
+  const checkExistingPatient = async (name: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/prescriptions');
+      const prescriptions = await response.json();
+      
+      // Find the most recent prescription for this patient
+      const patientPrescription = prescriptions.find((p: any) => 
+        p.patientName.toLowerCase() === name.toLowerCase()
+      );
+
+      if (patientPrescription) {
+        setCaseNumber(patientPrescription.caseNumber || '');
+        setIsExistingPatient(true);
+        return true;
+      }
+      
+      // If patient doesn't exist, generate new case number
+      const lastPrescription = prescriptions[0];
+      const lastCaseNumber = lastPrescription?.caseNumber || 'CASE0000';
+      const number = parseInt(lastCaseNumber.replace('CASE', '')) + 1;
+      const newCaseNumber = `CASE${number.toString().padStart(4, '0')}`;
+      setCaseNumber(newCaseNumber);
+      setIsExistingPatient(false);
+      return false;
+    } catch (error) {
+      console.error('Error checking patient:', error);
+      setCaseNumber(''); // Set empty string on error
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle patient name change
+  const handlePatientNameChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setPatientName(name);
+    
+    if (name.trim()) {
+      await checkExistingPatient(name);
+    } else {
+      setCaseNumber(''); // Set empty string when name is empty
+      setIsExistingPatient(false);
+    }
+  };
+
+  // Modify the case number input to be read-only
+  const handleCaseNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isExistingPatient) {
+      setCaseNumber(e.target.value || ''); // Ensure empty string if value is null/undefined
+    }
+  };
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -325,7 +386,7 @@ Notes: ${notes}
         boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.18)',
         borderRadius: 28,
         padding: '48px 40px 32px 40px',
-        width: 520,
+        width: 900,
         maxWidth: '98vw',
         display: 'flex',
         flexDirection: 'column',
@@ -365,12 +426,32 @@ Notes: ${notes}
         ) : (
           <form onSubmit={handleSubmit} style={{width: '100%'}}>
             <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: 4 }}>Case Number</label>
+                <input
+                  type="text"
+                  value={caseNumber || ''}
+                  onChange={handleCaseNumberChange}
+                  required
+                  readOnly={isExistingPatient}
+                  placeholder={loading ? "Loading..." : "Enter case number"}
+                  style={{ 
+                    width: '100%', 
+                    padding: 10, 
+                    borderRadius: 6, 
+                    border: '1px solid #cbd5e1', 
+                    background: isExistingPatient ? '#f1f5f9' : '#f8fafc',
+                    cursor: isExistingPatient ? 'not-allowed' : 'text',
+                    opacity: loading ? 0.7 : 1
+                  }}
+                />
+              </div>
               <div style={{ flex: 2 }}>
                 <label style={{ display: 'block', marginBottom: 4 }}>Patient Name</label>
                 <input
                   type="text"
                   value={patientName}
-                  onChange={e => setPatientName(e.target.value)}
+                  onChange={handlePatientNameChange}
                   required
                   style={{ width: '100%', padding: 10, borderRadius: 6, border: '1px solid #cbd5e1', background: '#f8fafc' }}
                 />

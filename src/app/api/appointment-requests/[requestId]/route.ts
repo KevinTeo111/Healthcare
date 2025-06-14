@@ -4,9 +4,9 @@ import clientPromise from '@/app/api/mongodb'; // Adjust path as needed
 
 export async function PUT(
   request: Request,
-  context: { params: { requestId: string } }
+  { params }: { params: { requestId: string } }
 ) {
-  const { requestId } = context.params;
+  const { requestId } = params;
 
   try {
     // Validate ObjectId

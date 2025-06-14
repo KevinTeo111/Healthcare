@@ -3,9 +3,27 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface AppointmentRequest {
+  _id: string;
+  patientName: string;
+  preferredDate: string;
+  preferredTime: string;
+  notes?: string;
+  status: 'pending' | 'accepted' | 'rejected';
+}
+
+interface PreviousAppointment {
+  _id: string;
+  doctorName: string;
+  date: string;
+  time: string;
+  diagnosis?: string;
+  prescription?: string;
+}
+
 export default function PatientAppointmentsPage() {
-  const [appointmentRequests, setAppointmentRequests] = useState<any[]>([]);
-  const [previousAppointments, setPreviousAppointments] = useState<any[]>([]);
+  const [appointmentRequests, setAppointmentRequests] = useState<AppointmentRequest[]>([]);
+  const [previousAppointments, setPreviousAppointments] = useState<PreviousAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();

@@ -2,10 +2,16 @@ import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import clientPromise from '../../mongodb';
 
+type RouteParams = {
+  params: {
+    id: string;
+  };
+};
+
 // GET /api/appointments/[id] - Get a specific appointment
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const { id } = params;
@@ -44,7 +50,7 @@ export async function GET(
 // PUT /api/appointments/[id] - Update a specific appointment
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const { id } = params;
@@ -123,7 +129,7 @@ export async function PUT(
 // DELETE /api/appointments/[id] - Delete a specific appointment
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const { id } = params;

@@ -50,6 +50,7 @@ interface Notification {
   createdAt: string;
   time?: string;
   requestId?: string;
+  appointmentId?: string;
 }
 
 interface AppointmentRequest {
@@ -397,7 +398,7 @@ const DashboardNew: React.FC = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          credentials: 'include', // Include cookies if needed
+          credentials: 'include',
         });
         
         if (!notificationsRes.ok) {
@@ -406,8 +407,8 @@ const DashboardNew: React.FC = () => {
         }
         const generalNotifications = await notificationsRes.json();
 
-        // Fetch pending appointment requests
-        const appointmentRequestsRes = await fetch('/api/appointment-requests', {
+        // Fetch pending appointments
+        const appointmentsRes = await fetch('/api/appointments?status=pending', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -415,11 +416,11 @@ const DashboardNew: React.FC = () => {
           credentials: 'include',
         });
         
-        if (!appointmentRequestsRes.ok) {
-          console.error('Failed to fetch appointment requests:', appointmentRequestsRes.status, appointmentRequestsRes.statusText);
-          throw new Error(`Appointment requests fetch failed: ${appointmentRequestsRes.statusText}`);
+        if (!appointmentsRes.ok) {
+          console.error('Failed to fetch appointments:', appointmentsRes.status, appointmentsRes.statusText);
+          throw new Error(`Appointments fetch failed: ${appointmentsRes.statusText}`);
         }
-        const pendingRequests = await appointmentRequestsRes.json();
+        const pendingAppointments = await appointmentsRes.json();
 
         // Fetch prescriptions
         const prescriptionsRes = await fetch('/api/prescriptions', {
@@ -439,18 +440,18 @@ const DashboardNew: React.FC = () => {
 
         const now = new Date();
 
-        // Format appointment requests as notifications
-        const appointmentNotifications = pendingRequests.map((request: any) => ({
-          id: request._id, // Use the request ID as notification ID
-          type: 'appointment_request', // New type
-          message: `New appointment request from ${request.patientName} for ${request.preferredDate} at ${request.preferredTime}.`,
-          time: request.createdAt ? new Date(request.createdAt).toLocaleTimeString() : 'Just now',
-          createdAt: request.createdAt || now.toISOString(),
-          requestId: request._id, // Store original request ID
+        // Format appointments as notifications
+        const appointmentNotifications = pendingAppointments.map((appointment: any) => ({
+          id: appointment._id,
+          type: 'appointment',
+          message: `New appointment request from ${appointment.patientName} for ${new Date(appointment.date).toLocaleDateString()} at ${appointment.time}.`,
+          time: appointment.createdAt ? new Date(appointment.createdAt).toLocaleTimeString() : 'Just now',
+          createdAt: appointment.createdAt || now.toISOString(),
+          appointmentId: appointment._id,
         }));
 
-         // Format prescription notifications
-         const prescriptionNotifications = fetchedPrescriptions.map((prescription: any) => ({
+        // Format prescription notifications
+        const prescriptionNotifications = fetchedPrescriptions.map((prescription: any) => ({
           id: `prescription-${prescription._id}`,
           type: 'prescription',
           message: `Patient ${prescription.patientName} was prescribed for ${prescription.disease}.`,
@@ -471,7 +472,7 @@ const DashboardNew: React.FC = () => {
         setNotifications(allNotifications);
 
       } catch (err) {
-        console.error('Failed to fetch notifications and appointment requests:', err);
+        console.error('Failed to fetch notifications and appointments:', err);
       }
     };
 
@@ -481,29 +482,29 @@ const DashboardNew: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Handle accepting or rejecting appointment requests from notifications
-  const handleRequestAction = async (requestId: string | undefined, status: 'accepted' | 'rejected') => {
-    if (!requestId) return;
+  // Handle accepting or rejecting appointments from notifications
+  const handleRequestAction = async (appointmentId: string | undefined, status: 'accepted' | 'rejected') => {
+    if (!appointmentId) return;
     
-    // Optimistically update UI: remove the request notification from the list
+    // Optimistically update UI: remove the appointment notification from the list
     setNotifications((prevNotifications: Notification[]) => 
-      prevNotifications.filter((n: Notification) => !(n.type === 'appointment_request' && n.requestId === requestId))
+      prevNotifications.filter((n: Notification) => !(n.type === 'appointment' && n.appointmentId === appointmentId))
     );
 
     try {
-      // Call the backend API to update the request status
-      const res = await fetch(`/api/appointment-requests/${requestId}`, {
+      // Call the backend API to update the appointment status
+      const res = await fetch(`/api/appointments/${appointmentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
 
       if (!res.ok) {
-        console.error(`Failed to update request ${requestId} status to ${status}`);
+        console.error(`Failed to update appointment ${appointmentId} status to ${status}`);
         // Consider adding the notification back or showing an error message here
       }
     } catch (err) {
-      console.error(`Error updating request ${requestId} status:`, err);
+      console.error(`Error updating appointment ${appointmentId} status:`, err);
       // Consider adding the notification back or showing an error message here
     }
   };
@@ -710,10 +711,10 @@ const DashboardNew: React.FC = () => {
                     <span>{n.message}</span>
                     <span style={{ marginLeft: 'auto', color: '#94a3b8', fontSize: 13 }}>{n.time}</span>
                      {/* Add Accept/Reject buttons next to appointment request notifications */}
-                     {n.type === 'appointment_request' && n.requestId && (
+                     {n.type === 'appointment_request' && n.appointmentId && (
                         <div style={{display: 'flex', gap: '8px'}}>
                            <button
-                            onClick={() => handleRequestAction(n.requestId!, 'accepted')}
+                            onClick={() => handleRequestAction(n.appointmentId!, 'accepted')}
                             style={{
                               padding: '4px 8px',
                               background: '#10b981',
@@ -728,7 +729,7 @@ const DashboardNew: React.FC = () => {
                             Accept
                           </button>
                           <button
-                             onClick={() => handleRequestAction(n.requestId!, 'rejected')}
+                             onClick={() => handleRequestAction(n.appointmentId!, 'rejected')}
                              style={{
                                padding: '4px 8px',
                                background: '#ef4444',

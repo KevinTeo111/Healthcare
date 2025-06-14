@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     }
 
     const client = await clientPromise;
-    const db = client.db('prescriptionApp');
+    const db = client.db('healthsync');
 
     // Get the 5 most recent appointments for the user, regardless of status
     const previousAppointments = await db.collection('appointmentRequests')

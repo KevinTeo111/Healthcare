@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get('email');
     const client = await clientPromise;
-    const db = client.db('prescriptionApp');
+    const db = client.db('healthsync');
     let user;
     if (email) {
       user = await db.collection('users').findOne({ email });

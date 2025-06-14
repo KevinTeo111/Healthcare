@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Database connection error. Please try again.' }, { status: 503 });
     }
 
-    const db = client.db('prescriptionApp');
+    const db = client.db('healthsync');
     const user = await db.collection('users').findOne({ email, role });
 
     if (!user) {

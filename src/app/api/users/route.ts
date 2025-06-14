@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     }
 
     const client = await clientPromise;
-    const db = client.db('prescriptionApp');
+    const db = client.db('healthsync');
 
     // Check if user already exists
     const existingUser = await db.collection('users').findOne({ email });
@@ -132,7 +132,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const client = await clientPromise;
-    const db = client.db('prescriptionApp');
+    const db = client.db('healthsync');
 
     const result = await db.collection('users').deleteOne({ email });
 

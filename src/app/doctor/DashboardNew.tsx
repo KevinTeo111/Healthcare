@@ -392,16 +392,49 @@ const DashboardNew: React.FC = () => {
     const fetchNotificationsAndRequests = async () => {
       try {
         // Fetch general notifications
-        const notificationsRes = await fetch('/api/notifications');
-        const generalNotifications = notificationsRes.ok ? await notificationsRes.json() : [];
+        const notificationsRes = await fetch('/api/notifications', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', // Include cookies if needed
+        });
+        
+        if (!notificationsRes.ok) {
+          console.error('Failed to fetch notifications:', notificationsRes.status, notificationsRes.statusText);
+          throw new Error(`Notifications fetch failed: ${notificationsRes.statusText}`);
+        }
+        const generalNotifications = await notificationsRes.json();
 
         // Fetch pending appointment requests
-        const appointmentRequestsRes = await fetch('/api/appointment-requests');
-        const pendingRequests = appointmentRequestsRes.ok ? await appointmentRequestsRes.json() : [];
+        const appointmentRequestsRes = await fetch('/api/appointment-requests', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        
+        if (!appointmentRequestsRes.ok) {
+          console.error('Failed to fetch appointment requests:', appointmentRequestsRes.status, appointmentRequestsRes.statusText);
+          throw new Error(`Appointment requests fetch failed: ${appointmentRequestsRes.statusText}`);
+        }
+        const pendingRequests = await appointmentRequestsRes.json();
 
         // Fetch prescriptions
-        const prescriptionsRes = await fetch('/api/prescriptions');
-        const fetchedPrescriptions = prescriptionsRes.ok ? await prescriptionsRes.json() : [];
+        const prescriptionsRes = await fetch('/api/prescriptions', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        
+        if (!prescriptionsRes.ok) {
+          console.error('Failed to fetch prescriptions:', prescriptionsRes.status, prescriptionsRes.statusText);
+          throw new Error(`Prescriptions fetch failed: ${prescriptionsRes.statusText}`);
+        }
+        const fetchedPrescriptions = await prescriptionsRes.json();
         setPrescriptions(Array.isArray(fetchedPrescriptions) ? fetchedPrescriptions : []);
 
         const now = new Date();

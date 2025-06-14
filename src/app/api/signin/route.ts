@@ -6,6 +6,8 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password, role } = await request.json();
 
+    console.log('Sign-in attempt for:', { email, role });
+
     if (!email || !password || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
@@ -22,16 +24,19 @@ export async function POST(request: NextRequest) {
     const user = await db.collection('users').findOne({ email, role });
 
     if (!user) {
+      console.log('User not found for:', { email, role });
       return NextResponse.json({ error: 'Invalid email, password, or role' }, { status: 401 });
     }
 
-    // Compare the provided password with the hashed password in the database
+    console.log('User found. Comparing passwords...');
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
+      console.log('Password mismatch for:', { email, role });
       return NextResponse.json({ error: 'Invalid email, password, or role' }, { status: 401 });
     }
 
+    console.log('Sign-in successful for:', { email, role });
     return NextResponse.json({ 
       message: 'Sign in successful', 
       name: user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.fullName || user.name,

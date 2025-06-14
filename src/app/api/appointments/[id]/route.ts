@@ -5,10 +5,10 @@ import clientPromise from '../../mongodb';
 // GET /api/appointments/[id] - Get a specific appointment
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!ObjectId.isValid(id)) {
       return NextResponse.json(
@@ -44,10 +44,10 @@ export async function GET(
 // PUT /api/appointments/[id] - Update a specific appointment
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { status, notes, date, time } = body;
 
@@ -123,10 +123,10 @@ export async function PUT(
 // DELETE /api/appointments/[id] - Delete a specific appointment
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!ObjectId.isValid(id)) {
       return NextResponse.json(

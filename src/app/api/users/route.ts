@@ -122,46 +122,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT /api/users/[userId] - Update user role
-export async function PUT(request: Request, { params }: { params: { userId: string } }) {
-  try {
-    const { userId } = params;
-    const { role } = await request.json();
-
-    if (!['admin', 'doctor', 'patient'].includes(role)) {
-      return NextResponse.json(
-        { error: 'Invalid role' },
-        { status: 400 }
-      );
-    }
-
-    const { db } = await connectToDatabase();
-    const result = await db.collection('users').updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { role } }
-    );
-
-    if (result.matchedCount === 0) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ message: 'User role updated successfully' });
-  } catch (error) {
-    console.error('Error updating user role:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    return NextResponse.json(
-      { 
-        error: 'Failed to update user role',
-        details: errorMessage
-      },
-      { status: 500 }
-    );
-  }
-}
-
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

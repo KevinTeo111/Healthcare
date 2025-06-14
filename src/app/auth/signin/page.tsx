@@ -1,8 +1,15 @@
 'use client';
 
-import SignInForm from '../components/SignInForm';
 import React from 'react';
+import SignInForm from '../components/SignInForm';
+import { useRouter } from 'next/navigation';
 
 export default function SignInPage() {
-  return <SignInForm />;
+  const router = useRouter();
+
+  const handleSwitchToSignUp = () => {
+    router.push('/auth/signup');
+  };
+
+  return <SignInForm onSwitchToSignUp={handleSwitchToSignUp} />;
 }

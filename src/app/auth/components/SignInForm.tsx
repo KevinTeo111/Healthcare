@@ -17,7 +17,11 @@ interface SignInResponse {
   error?: string;
 }
 
-export default function SignInForm() {
+interface SignInFormProps {
+  onSwitchToSignUp: () => void;
+}
+
+export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     email: '',
@@ -247,7 +251,20 @@ export default function SignInForm() {
         </form>
         <div className="signup-link" style={{color: "#bdbdbd", fontSize: "0.98rem", textAlign: "center", marginTop: 24}}>
           Don't have an Account?{' '}
-          <Link href="/auth/signup" style={{color: "#fff", textDecoration: "none", marginLeft: 4}}>Sign Up</Link>
+          <button
+            onClick={onSwitchToSignUp}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#6c63ff",
+              cursor: "pointer",
+              fontSize: "1rem",
+              fontWeight: 500,
+              padding: 0
+            }}
+          >
+            Sign Up
+          </button>
         </div>
       </div>
     </div>

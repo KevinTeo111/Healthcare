@@ -22,7 +22,7 @@ interface Medicine {
   quantity: string;
 }
 
-export default function AppointmentDetailsPage({ params }: { params: { requestId: string } }) {
+export default function AppointmentDetailsPage({ params }: { params: Promise<{ requestId: string }> }) {
   const router = useRouter();
   const [appointment, setAppointment] = useState<AppointmentDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,11 +34,14 @@ export default function AppointmentDetailsPage({ params }: { params: { requestId
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newMedicine, setNewMedicine] = useState({ name: '', quantity: '' });
+  const [requestId, setRequestId] = useState<string>('');
 
   useEffect(() => {
     const fetchAppointmentDetails = async () => {
       try {
-        const response = await fetch(`/api/appointment-requests/${params.requestId}`);
+        const { requestId: id } = await params;
+        setRequestId(id);
+        const response = await fetch(`/api/appointment-requests/${id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch appointment details');
         }
@@ -52,7 +55,7 @@ export default function AppointmentDetailsPage({ params }: { params: { requestId
     };
 
     fetchAppointmentDetails();
-  }, [params.requestId]);
+  }, [params]);
 
   const handleAddMedicine = () => {
     if (newMedicine.name.trim() && newMedicine.quantity.trim()) {
@@ -98,7 +101,7 @@ export default function AppointmentDetailsPage({ params }: { params: { requestId
         throw new Error('Failed to save prescription');
       }
 
-      await fetch(`/api/appointment-requests/${params.requestId}`, {
+      await fetch(`/api/appointment-requests/${requestId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

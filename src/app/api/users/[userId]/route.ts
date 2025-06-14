@@ -5,10 +5,10 @@ import { ObjectId } from 'mongodb';
 // PUT /api/users/[userId] - Update user role
 export async function PUT(
   request: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const { userId } = params;
+    const { userId } = await params;
     const { role } = await request.json();
 
     // Validate role

@@ -1,4 +1,4 @@
 // Doctor's Appointments Page
 'use client';
-import AppointmentsPage from './appointments/page';
+import AppointmentsPage from '../dashboard/doctor/appointments/page';
 export default AppointmentsPage;

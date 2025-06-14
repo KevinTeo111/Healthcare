@@ -14,13 +14,17 @@ interface FormData {
   role: UserRole;
 }
 
+interface SignUpFormProps {
+  onSwitchToSignIn: () => void;
+}
+
 interface SignUpResponse {
   email: string;
   role: UserRole;
   error?: string;
 }
 
-export default function SignUpForm() {
+export default function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
@@ -248,9 +252,22 @@ export default function SignUpForm() {
           </div>
           <button className="signup-btn" type="submit" style={{width: "100%", background: "#6c63ff", color: "#fff", border: "none", borderRadius: 24, padding: "12px 0", fontSize: "1.1rem", fontWeight: 600, cursor: "pointer", transition: "background 0.2s"}}>Sign Up</button>
         </form>
-        <div className="signin-link" style={{color: "#bdbdbd", fontSize: "0.98rem", textAlign: "center", marginTop: 24}}>
-          Already have an Account?{' '}
-          <Link href="/auth/signin" style={{color: "#fff", textDecoration: "none", marginLeft: 4}}>Sign In</Link>
+        <div style={{marginTop: 24, textAlign: "center", color: "#d1d1d1"}}>
+          Already have an account?{' '}
+          <button
+            onClick={onSwitchToSignIn}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#6c63ff",
+              cursor: "pointer",
+              fontSize: "1rem",
+              fontWeight: 500,
+              padding: 0
+            }}
+          >
+            Sign In
+          </button>
         </div>
       </div>
     </div>

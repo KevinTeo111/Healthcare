@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '../mongodb';
+import { connectToDatabase } from '@/lib/mongodb';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,21 +10,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db('prescriptionApp');
+    const { db } = await connectToDatabase();
 
+    // Check if user already exists
     const existingUser = await db.collection('users').findOne({ email, role });
     if (existingUser) {
       return NextResponse.json({ error: `User with email ${email} and role ${role} already exists` }, { status: 409 });
     }
 
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user
     await db.collection('users').insertOne({ 
       firstName, 
       lastName, 
-      fullName: `${firstName} ${lastName}`, // Keep fullName for backward compatibility
+      fullName: `${firstName} ${lastName}`,
       email, 
-      password, 
-      role 
+      password: hashedPassword, 
+      role,
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 
     return NextResponse.json({ 

@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
       marginTop: '2rem',
       fontSize: '0.9rem',
     }}>
-      <p>© 2025 MediHealth. All rights reserved.</p>
+      <p>© 2025 HealthSync</p>
       <p>
         <a href="/privacy" style={{ color: 'white', textDecoration: 'underline', marginRight: '1rem' }}>Privacy Policy</a>
         <a href="/terms" style={{ color: 'white', textDecoration: 'underline' }}>Terms of Service</a>

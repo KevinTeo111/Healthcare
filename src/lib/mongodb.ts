@@ -10,6 +10,13 @@ if (!process.env.MONGODB_DB) {
 
 // Remove any whitespace from the URI
 const uri = process.env.MONGODB_URI.trim();
+console.log('MongoDB URI format check:', {
+  hasProtocol: uri.startsWith('mongodb+srv://'),
+  hasUsername: uri.includes('@'),
+  hasDatabase: uri.includes('/healthsync'),
+  length: uri.length
+});
+
 const options = {
   maxPoolSize: 10,
   serverSelectionTimeoutMS: 5000,
@@ -17,6 +24,10 @@ const options = {
   connectTimeoutMS: 10000,
   retryWrites: true,
   retryReads: true,
+  ssl: true,
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  tlsAllowInvalidHostnames: false,
 };
 
 let client: MongoClient;
@@ -42,12 +53,17 @@ if (process.env.NODE_ENV === 'development') {
 
 export async function connectToDatabase() {
   try {
+    console.log('Attempting to connect to MongoDB...');
     const client = await clientPromise;
+    console.log('MongoClient connected successfully');
+    
     const db = client.db(process.env.MONGODB_DB);
+    console.log('Database selected:', process.env.MONGODB_DB);
     
     // Test the connection
+    console.log('Testing connection with ping...');
     await db.command({ ping: 1 });
-    console.log('Successfully connected to MongoDB.');
+    console.log('Ping successful');
     
     return { client, db };
   } catch (error) {
@@ -56,9 +72,11 @@ export async function connectToDatabase() {
       console.error('Connection error details:', {
         message: error.message,
         name: error.name,
-        stack: error.stack
+        stack: error.stack,
+        code: (error as any).code,
+        codeName: (error as any).codeName
       });
     }
-    throw new Error('Failed to connect to MongoDB');
+    throw new Error(`Failed to connect to MongoDB: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 } 

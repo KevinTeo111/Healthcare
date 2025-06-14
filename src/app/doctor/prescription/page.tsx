@@ -18,6 +18,24 @@ interface PrescriptionMedicine {
   quantity: number;
 }
 
+interface PrescriptionData {
+  patientName: string;
+  age: string;
+  gender: string;
+  bloodGroup: string;
+  doctorName: string;
+  date: string;
+  disease: string;
+  notes: string;
+  caseNumber: string;
+  medicines: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+  }>;
+  createdAt: Date;
+}
+
 const bloodGroups = [
   '', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
 ];
@@ -110,7 +128,7 @@ const PrescriptionPage: React.FC = () => {
       alert('Please add at least one medicine.');
       return;
     }
-    const prescriptionData = {
+    const prescriptionData: PrescriptionData = {
       patientName,
       age,
       gender,
@@ -144,7 +162,7 @@ const PrescriptionPage: React.FC = () => {
     }
   };
 
-  const savePrescription = async () => {
+  const savePrescription = async (): Promise<boolean> => {
     if (!patientName.trim() || !age.trim() || !gender.trim() || !doctorName.trim() || !date.trim() || !caseNumber.trim()) {
       alert('Please fill all required fields.');
       return false;
@@ -153,7 +171,7 @@ const PrescriptionPage: React.FC = () => {
       alert('Please add at least one medicine.');
       return false;
     }
-    const prescriptionData = {
+    const prescriptionData: PrescriptionData = {
       patientName,
       age,
       gender,

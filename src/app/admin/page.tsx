@@ -4,17 +4,37 @@ import React, { useEffect, useState } from "react";
 import * as XLSX from 'xlsx';
 import Papa from 'papaparse';
 
+interface User {
+  name: string;
+  fullName?: string;
+  email: string;
+  password: string;
+}
+
+interface AuditLog {
+  action: string;
+  details: string;
+  timestamp: string;
+  user: string;
+}
+
+interface BackupData {
+  users: User[];
+  timestamp: string;
+  version: string;
+}
+
 export default function AdminPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
-  const [editUser, setEditUser] = useState<any>({});
-  const [newUser, setNewUser] = useState<any>({ name: '', email: '', password: '' });
+  const [editUser, setEditUser] = useState<User>({ name: '', email: '', password: '' });
+  const [newUser, setNewUser] = useState<User>({ name: '', email: '', password: '' });
   const [addMode, setAddMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [showAuditLogs, setShowAuditLogs] = useState(false);
-  const [backupData, setBackupData] = useState<any>(null);
+  const [backupData, setBackupData] = useState<BackupData | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -22,12 +42,12 @@ export default function AdminPage() {
       const res = await fetch('/api/users');
       if (!res.ok) throw new Error('Failed to fetch users');
       const data = await res.json();
-      setUsers(data.map((user: any) => ({
+      setUsers(data.map((user: User) => ({
         name: user.name || user.fullName || '',
         email: user.email || '',
         password: user.password || '',
       })));
-    } catch (error) {
+    } catch (err) {
       setError('Failed to fetch users');
       setUsers([]);
     } finally {
@@ -39,13 +59,13 @@ export default function AdminPage() {
     fetchUsers();
   }, []);
 
-  const handleEdit = (user: any) => {
+  const handleEdit = (user: User) => {
     setEditUser({ ...user });
     setEditMode(true);
   };
 
   const handleCancel = () => {
-    setEditUser({});
+    setEditUser({ name: '', email: '', password: '' });
     setEditMode(false);
   };
 
@@ -69,14 +89,14 @@ export default function AdminPage() {
       // Update local state
       setUsers(users.map(u => u.email === editUser.email ? editUser : u));
       setEditMode(false);
-      setEditUser({});
+      setEditUser({ name: '', email: '', password: '' });
       alert('User updated successfully!');
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to update user');
     }
   };
 
-  const handleDelete = async (user: any) => {
+  const handleDelete = async (user: User) => {
     if (!confirm(`Are you sure you want to delete user ${user.name}?`)) {
       return;
     }
@@ -161,7 +181,7 @@ export default function AdminPage() {
       try {
         const text = e.target?.result as string;
         const results = Papa.parse(text, { header: true });
-        const importedUsers = results.data as any[];
+        const importedUsers = results.data as User[];
         
         // Validate imported data
         const validUsers = importedUsers.filter(user => user.email && user.name);
@@ -186,7 +206,7 @@ export default function AdminPage() {
   };
 
   const createBackup = () => {
-    const backup = {
+    const backup: BackupData = {
       users,
       timestamp: new Date().toISOString(),
       version: '1.0'
@@ -207,7 +227,7 @@ export default function AdminPage() {
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        const backup = JSON.parse(e.target?.result as string);
+        const backup = JSON.parse(e.target?.result as string) as BackupData;
         if (!backup.users || !Array.isArray(backup.users)) {
           throw new Error('Invalid backup file format');
         }
@@ -224,15 +244,15 @@ export default function AdminPage() {
         await fetchUsers();
         logAuditAction('restore', 'Restored system from backup');
         alert('System restored successfully');
-      } catch (error) {
-        alert('Error restoring backup: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      } catch (err) {
+        alert('Error restoring backup: ' + (err instanceof Error ? err.message : 'Unknown error'));
       }
     };
     reader.readAsText(file);
   };
 
   const logAuditAction = (action: string, details: string) => {
-    const log = {
+    const log: AuditLog = {
       action,
       details,
       timestamp: new Date().toISOString(),

@@ -4,10 +4,22 @@ if (!process.env.MONGODB_URI) {
   throw new Error('Please add your Mongo URI to .env.local');
 }
 
-const uri = process.env.MONGODB_URI;
-const options = {};
+if (!process.env.MONGODB_DB) {
+  throw new Error('Please add your Mongo DB name to .env.local');
+}
 
-let client;
+// Remove any whitespace from the URI
+const uri = process.env.MONGODB_URI.trim();
+const options = {
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  connectTimeoutMS: 10000,
+  retryWrites: true,
+  retryReads: true,
+};
+
+let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === 'development') {
@@ -29,7 +41,24 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export async function connectToDatabase() {
-  const client = await clientPromise;
-  const db = client.db(process.env.MONGODB_DB);
-  return { client, db };
+  try {
+    const client = await clientPromise;
+    const db = client.db(process.env.MONGODB_DB);
+    
+    // Test the connection
+    await db.command({ ping: 1 });
+    console.log('Successfully connected to MongoDB.');
+    
+    return { client, db };
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    if (error instanceof Error) {
+      console.error('Connection error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
+    }
+    throw new Error('Failed to connect to MongoDB');
+  }
 } 

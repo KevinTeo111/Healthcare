@@ -1,39 +1,29 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '../mongodb';
+import { connectToDatabase } from '@/lib/mongodb';
 
 export async function GET() {
   try {
     console.log('Testing MongoDB connection...');
-    console.log('MongoDB URI:', process.env.MONGODB_URI ? 'URI is set' : 'URI is not set');
+    console.log('MONGODB_URI:', process.env.MONGODB_URI ? 'Set' : 'Not set');
+    console.log('MONGODB_DB:', process.env.MONGODB_DB ? 'Set' : 'Not set');
     
     const { db } = await connectToDatabase();
-    console.log('Connected to database successfully');
-
-    // Test the connection by listing collections
+    console.log('Successfully connected to MongoDB');
+    
+    // Test a simple query
     const collections = await db.listCollections().toArray();
     console.log('Available collections:', collections.map(c => c.name));
-
-    // Try to count users
-    const usersCollection = db.collection('users');
-    const userCount = await usersCollection.countDocuments();
-    console.log('Number of users:', userCount);
-
-    // Fetch one user document to inspect its structure
-    const sampleUser = userCount > 0 ? await usersCollection.findOne({}) : null;
-
-    return NextResponse.json({
+    
+    return NextResponse.json({ 
       status: 'success',
-      message: 'Database connection successful!',
-      collections: collections.map(c => c.name),
-      usersCollectionExists: collections.some(c => c.name === 'users'),
-      userCount: userCount,
-      sampleUser: sampleUser
+      message: 'MongoDB connection successful',
+      collections: collections.map(c => c.name)
     });
   } catch (error) {
-    console.error('Database connection test failed:', error);
-    return NextResponse.json({
+    console.error('MongoDB connection test failed:', error);
+    return NextResponse.json({ 
       status: 'error',
-      message: error instanceof Error ? error.message : 'Unknown error occurred',
+      message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 });
   }

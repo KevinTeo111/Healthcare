@@ -5,17 +5,15 @@ import { useRouter } from 'next/navigation';
 
 interface Patient {
   id: string;
+  _id?: string;
   name: string;
-  age: number;
-  email?: string;
-  phone?: string;
-  gender?: string;
-  bloodGroup?: string;
+  age: string;
+  gender: string;
+  bloodGroup: string;
   caseNumber?: string;
   diagnoses?: string[];
   treatments?: string[];
   allergies?: string[];
-  labs?: string[];
   prescriptions?: Prescription[];
 }
 
@@ -31,7 +29,7 @@ interface SearchResult {
   id: string;
   type: 'patient' | 'appointment';
   name?: string;
-  age?: number;
+  age?: string;
   patient?: string;
   date?: string;
   time?: string;
@@ -39,17 +37,17 @@ interface SearchResult {
 
 interface Profile {
   name: string;
-  email: string;
-  specialization?: string;
-  experience?: string;
-  bio?: string;
+  specialties: string;
+  hours: string;
+  contact: string;
 }
 
 interface Notification {
-  id: string;
+  _id: string;
+  id?: string;
   type: string;
   message: string;
-  timestamp: string;
+  createdAt: string;
   time?: string;
   requestId?: string;
 }
@@ -64,15 +62,19 @@ interface AppointmentRequest {
 }
 
 interface Prescription {
-  id: string;
+  _id: string;
   patientName: string;
-  caseNumber: string;
-  medicines: Array<{
-    name: string;
-    dosage: string;
-    frequency: string;
-  }>;
-  date: string;
+  medicines: string[];
+  diagnosis: string;
+  createdAt: string;
+  age?: string;
+  gender?: string;
+  bloodGroup?: string;
+  caseNumber?: string;
+  disease?: string;
+  notes?: string;
+  date?: string;
+  doctorName?: string;
 }
 
 // Sidebar component with icons
@@ -375,11 +377,10 @@ const DashboardNew: React.FC = () => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [patientResults, setPatientResults] = useState<Patient[]>([]);
   const [profile, setProfile] = useState<Profile>({
-    name: '',
-    email: '',
-    specialization: '',
-    experience: '',
-    bio: ''
+    name: 'Dr. John Doe',
+    specialties: 'Cardiology',
+    hours: 'Mon-Fri 9am-5pm',
+    contact: 'dr.john@example.com',
   });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [appointmentRequests, setAppointmentRequests] = useState<AppointmentRequest[]>([]);
@@ -447,76 +448,92 @@ const DashboardNew: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleRequestAction = async (requestId: string, status: 'accepted' | 'rejected') => {
+  // Handle accepting or rejecting appointment requests from notifications
+  const handleRequestAction = async (requestId: string | undefined, status: 'accepted' | 'rejected') => {
+    if (!requestId) return;
+    
+    // Optimistically update UI: remove the request notification from the list
+    setNotifications((prevNotifications: Notification[]) => 
+      prevNotifications.filter((n: Notification) => !(n.type === 'appointment_request' && n.requestId === requestId))
+    );
+
     try {
+      // Call the backend API to update the request status
       const res = await fetch(`/api/appointment-requests/${requestId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
-      if (!res.ok) throw new Error('Failed to update request');
-      
-      // Update local state
-      setAppointmentRequests(prev => 
-        prev.map(req => req.id === requestId ? { ...req, status } : req)
-      );
-      
-      // Add notification
-      setNotifications(prev => [{
-        id: Date.now().toString(),
-        type: 'appointment',
-        message: `Appointment request ${status}`,
-        timestamp: new Date().toISOString(),
-        requestId
-      }, ...prev]);
-    } catch (error) {
-      console.error('Error updating request:', error);
+
+      if (!res.ok) {
+        console.error(`Failed to update request ${requestId} status to ${status}`);
+        // Consider adding the notification back or showing an error message here
+      }
+    } catch (err) {
+      console.error(`Error updating request ${requestId} status:`, err);
+      // Consider adding the notification back or showing an error message here
     }
   };
 
-  const handleNotificationAction = (notification: Notification) => {
-    if (notification.type === 'appointment' && typeof notification.requestId === 'string') {
-      handleRequestAction(notification.requestId, 'accepted');
-    }
-  };
-
-  const handleNotificationDismiss = (notification: Notification) => {
-    if (notification.type === 'appointment' && typeof notification.requestId === 'string') {
-      handleRequestAction(notification.requestId, 'rejected');
-    }
-  };
-
-  const handleSelectPatient = (patient: Patient) => {
-    setSelectedPatient(patient);
-    const patientPrescriptions = prescriptions.filter((p) =>
-      p.patientName === patient.name
-    );
-    setPrescriptions(patientPrescriptions);
-  };
-
-  const handlePatientSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Simulate patient search (replace with API integration)
+  const handlePatientSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value.trim() === '') {
+    setPatientSearch(value);
+    if (!value.trim()) {
       setPatientResults([]);
       return;
     }
-    try {
-      const res = await fetch(`/api/patients?search=${encodeURIComponent(value)}`);
-      if (!res.ok) throw new Error('Failed to fetch patients');
-      const data = await res.json();
-      setPatientResults(data.map((p: any) => ({
-        ...p,
-        age: typeof p.age === 'string' ? parseInt(p.age, 10) : p.age,
-        diagnoses: p.diagnoses || [],
-        treatments: p.treatments || [],
-        allergies: p.allergies || [],
-        labs: p.labs || [],
-        prescriptions: p.prescriptions || []
-      })));
-    } catch (error) {
-      console.error('Error searching patients:', error);
-      setPatientResults([]);
-    }
+    // Search patients from prescriptions
+    const uniquePatients = Array.from(
+      new Set(prescriptions.map((p: Prescription) => `${p.patientName}|${p.age || '-'}|${p.gender || '-'}|${p.bloodGroup || '-'}|${p.caseNumber || '-'}`))
+    ).map(key => {
+      const [name, age, gender, bloodGroup, caseNumber] = key.split('|');
+      return {
+        id: key,
+        name,
+        age,
+        gender,
+        bloodGroup,
+        caseNumber,
+      };
+    });
+    setPatientResults(
+      uniquePatients.filter(p => 
+        p.name.toLowerCase().includes(value.toLowerCase()) ||
+        p.caseNumber.toLowerCase().includes(value.toLowerCase())
+      )
+    );
+  };
+
+  // Simulate selecting a patient
+  const handleSelectPatient = (patient: Patient) => {
+    // Filter all prescriptions for this patient (match only by patientName and caseNumber)
+    const patientPrescriptions = prescriptions.filter((p: Prescription) =>
+      p.patientName === patient.name && p.caseNumber === patient.caseNumber
+    );
+    setSelectedPatient({
+      ...patient,
+      diagnoses: Array.from(new Set(patientPrescriptions.map((p: Prescription) => p.disease || '').filter(Boolean))),
+      treatments: [], // Not available in prescription data
+      allergies: [], // Not available in prescription data
+      prescriptions: patientPrescriptions.map((pres: Prescription) => ({
+        _id: pres._id,
+        patientName: pres.patientName,
+        medicines: pres.medicines,
+        diagnosis: pres.diagnosis,
+        createdAt: pres.createdAt,
+        date: pres.date || (pres.createdAt ? new Date(pres.createdAt).toLocaleDateString('en-GB') : '-'),
+        notes: pres.notes || '',
+        disease: pres.disease || '',
+        age: pres.age || '-',
+        gender: pres.gender || '-',
+        bloodGroup: pres.bloodGroup || '-',
+        doctorName: pres.doctorName || '',
+        caseNumber: pres.caseNumber || '',
+      })),
+    });
+    setPatientSearch('');
+    setPatientResults([]);
   };
 
   // Simulate profile update (no backend yet)
@@ -591,7 +608,7 @@ const DashboardNew: React.FC = () => {
                   </button>
                   <div style={{ marginBottom: 8 }}><strong>Case Number:</strong> {selectedPatient.caseNumber || 'Not Assigned'}</div>
                   <div style={{ marginBottom: 8 }}><strong>Name:</strong> {selectedPatient.name}</div>
-                  {selectedPatient.age && selectedPatient.age > 0 && (
+                  {selectedPatient.age && selectedPatient.age !== '-' && (
                     <div style={{ marginBottom: 8 }}><strong>Age:</strong> {selectedPatient.age}</div>
                   )}
                   {selectedPatient.gender && selectedPatient.gender !== '-' && (

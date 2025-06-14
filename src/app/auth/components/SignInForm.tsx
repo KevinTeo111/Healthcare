@@ -3,11 +3,23 @@ import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-interface SignInFormProps {}
+type UserRole = 'patient' | 'doctor';
 
-export default function SignInForm({}: SignInFormProps) {
+interface FormData {
+  email: string;
+  password: string;
+  role: UserRole;
+}
+
+interface SignInResponse {
+  role: UserRole;
+  name: string;
+  error?: string;
+}
+
+export default function SignInForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
     role: 'patient' // Default role
@@ -30,7 +42,7 @@ export default function SignInForm({}: SignInFormProps) {
         body: JSON.stringify({ email: formData.email, password: formData.password, role: formData.role }),
       });
 
-      const data = await res.json();
+      const data: SignInResponse = await res.json();
 
       if (!res.ok) {
         throw new Error(data.error || 'Failed to sign in');
@@ -57,12 +69,12 @@ export default function SignInForm({}: SignInFormProps) {
     }
   };
 
-   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleRoleSelect = (role: string) => {
+  const handleRoleSelect = (role: UserRole) => {
     setFormData(prev => ({ ...prev, role }));
     setIsRoleDropdownOpen(false);
   };

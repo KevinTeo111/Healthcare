@@ -4,11 +4,25 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useRef, useEffect } from "react";
 
-interface SignUpFormProps {}
+type UserRole = 'patient' | 'doctor';
 
-export default function SignUpForm({}: SignUpFormProps) {
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: UserRole;
+}
+
+interface SignUpResponse {
+  email: string;
+  role: UserRole;
+  error?: string;
+}
+
+export default function SignUpForm() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -35,7 +49,7 @@ export default function SignUpForm({}: SignUpFormProps) {
         throw new Error(data.error || 'Failed to sign up');
       }
 
-      const data = await res.json();
+      const data: SignUpResponse = await res.json();
 
       // Store user info in localStorage
       localStorage.setItem('userName', `${formData.firstName} ${formData.lastName}`);
@@ -58,7 +72,7 @@ export default function SignUpForm({}: SignUpFormProps) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleRoleSelect = (role: string) => {
+  const handleRoleSelect = (role: UserRole) => {
     setFormData(prev => ({ ...prev, role }));
     setIsRoleDropdownOpen(false);
   };

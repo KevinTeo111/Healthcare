@@ -3,10 +3,82 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface Patient {
+  id: string;
+  name: string;
+  age: number;
+  email?: string;
+  phone?: string;
+  gender?: string;
+  bloodGroup?: string;
+  caseNumber?: string;
+  diagnoses?: string[];
+  treatments?: string[];
+  allergies?: string[];
+  labs?: string[];
+  prescriptions?: Prescription[];
+}
+
+interface Appointment {
+  id: string;
+  patient: string;
+  date: string;
+  time: string;
+  status?: string;
+}
+
+interface SearchResult {
+  id: string;
+  type: 'patient' | 'appointment';
+  name?: string;
+  age?: number;
+  patient?: string;
+  date?: string;
+  time?: string;
+}
+
+interface Profile {
+  name: string;
+  email: string;
+  specialization?: string;
+  experience?: string;
+  bio?: string;
+}
+
+interface Notification {
+  id: string;
+  type: string;
+  message: string;
+  timestamp: string;
+  time?: string;
+  requestId?: string;
+}
+
+interface AppointmentRequest {
+  id: string;
+  patientId: string;
+  patientName: string;
+  date: string;
+  time: string;
+  status: 'pending' | 'accepted' | 'rejected';
+}
+
+interface Prescription {
+  id: string;
+  patientName: string;
+  caseNumber: string;
+  medicines: Array<{
+    name: string;
+    dosage: string;
+    frequency: string;
+  }>;
+  date: string;
+}
+
 // Sidebar component with icons
 interface SidebarProps {
   open: boolean;
-  onClose: () => void; // Ensure onClose is properly defined as a prop
+  onClose: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
@@ -95,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
 const Topbar: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
   const [userName, setUserName] = React.useState('Loading...');
   const [searchTerm, setSearchTerm] = React.useState('');
-  const [searchResults, setSearchResults] = React.useState<any[]>([]);
+  const [searchResults, setSearchResults] = React.useState<SearchResult[]>([]);
   const router = useRouter();
 
   // On mount, try to get user from localStorage first
@@ -155,8 +227,8 @@ const Topbar: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
       const patients = patientsRes.ok ? await patientsRes.json() : [];
       const appointments = appointmentsRes.ok ? await appointmentsRes.json() : [];
       setSearchResults([
-        ...patients.map((p: any) => ({ type: 'patient', ...p })),
-        ...appointments.map((a: any) => ({ type: 'appointment', ...a })),
+        ...patients.map((p: Patient) => ({ type: 'patient' as const, ...p })),
+        ...appointments.map((a: Appointment) => ({ type: 'appointment' as const, ...a })),
       ]);
     } catch {
       setSearchResults([]);
@@ -300,16 +372,18 @@ const DashboardNew: React.FC = () => {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [patientSearch, setPatientSearch] = useState('');
-  const [selectedPatient, setSelectedPatient] = useState<any>(null);
-  const [patientResults, setPatientResults] = useState<any[]>([]);
-  const [profile, setProfile] = useState({
-    name: 'Dr. John Doe',
-    specialties: 'Cardiology',
-    hours: 'Mon-Fri 9am-5pm',
-    contact: 'dr.john@example.com',
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [patientResults, setPatientResults] = useState<Patient[]>([]);
+  const [profile, setProfile] = useState<Profile>({
+    name: '',
+    email: '',
+    specialization: '',
+    experience: '',
+    bio: ''
   });
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [prescriptions, setPrescriptions] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [appointmentRequests, setAppointmentRequests] = useState<AppointmentRequest[]>([]);
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [loadingPrescriptions, setLoadingPrescriptions] = useState(false);
 
   // Real-time notifications & Appointment Requests via polling
@@ -373,94 +447,76 @@ const DashboardNew: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Handle accepting or rejecting appointment requests from notifications
   const handleRequestAction = async (requestId: string, status: 'accepted' | 'rejected') => {
-    // Optimistically update UI: remove the request notification from the list
-    setNotifications((prevNotifications: any[]) => prevNotifications.filter((n: any) => !(n.type === 'appointment_request' && n.requestId === requestId)));
-
     try {
-      // Call the backend API to update the request status
       const res = await fetch(`/api/appointment-requests/${requestId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
-
-      if (!res.ok) {
-        console.error(`Failed to update request ${requestId} status to ${status}`);
-        // Consider adding the notification back or showing an error message here
-      }
-    } catch (err) {
-       console.error(`Error updating request ${requestId} status:`, err);
-       // Consider adding the notification back or showing an error message here
+      if (!res.ok) throw new Error('Failed to update request');
+      
+      // Update local state
+      setAppointmentRequests(prev => 
+        prev.map(req => req.id === requestId ? { ...req, status } : req)
+      );
+      
+      // Add notification
+      setNotifications(prev => [{
+        id: Date.now().toString(),
+        type: 'appointment',
+        message: `Appointment request ${status}`,
+        timestamp: new Date().toISOString(),
+        requestId
+      }, ...prev]);
+    } catch (error) {
+      console.error('Error updating request:', error);
     }
   };
 
-  // Simulate patient search (replace with API integration)
-  const handlePatientSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNotificationAction = (notification: Notification) => {
+    if (notification.type === 'appointment' && typeof notification.requestId === 'string') {
+      handleRequestAction(notification.requestId, 'accepted');
+    }
+  };
+
+  const handleNotificationDismiss = (notification: Notification) => {
+    if (notification.type === 'appointment' && typeof notification.requestId === 'string') {
+      handleRequestAction(notification.requestId, 'rejected');
+    }
+  };
+
+  const handleSelectPatient = (patient: Patient) => {
+    setSelectedPatient(patient);
+    const patientPrescriptions = prescriptions.filter((p) =>
+      p.patientName === patient.name
+    );
+    setPrescriptions(patientPrescriptions);
+  };
+
+  const handlePatientSearch = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setPatientSearch(value);
-    if (!value.trim()) {
+    if (value.trim() === '') {
       setPatientResults([]);
       return;
     }
-    // Search patients from prescriptions
-    const uniquePatients = Array.from(
-      new Set(prescriptions.map((p: any) => `${p.patientName}|${p.age || '-'}|${p.gender || '-'}|${p.bloodGroup || '-'}|${p.caseNumber || '-'}`))
-    ).map(key => {
-      const [name, age, gender, bloodGroup, caseNumber] = key.split('|');
-      // Find the latest prescription for this patient
-      const latest = prescriptions.find((p: any) =>
-        p.patientName === name &&
-        String(p.age || '-') === age &&
-        String(p.gender || '-') === gender &&
-        String(p.bloodGroup || '-') === bloodGroup &&
-        String(p.caseNumber || '-') === caseNumber
-      );
-      return {
-        id: key,
-        name,
-        age,
-        gender,
-        bloodGroup,
-        caseNumber,
-      };
-    });
-    setPatientResults(
-      uniquePatients.filter(p => 
-        p.name.toLowerCase().includes(value.toLowerCase()) ||
-        p.caseNumber.toLowerCase().includes(value.toLowerCase())
-      )
-    );
-  };
-
-  // Simulate selecting a patient
-  const handleSelectPatient = (patient: any) => {
-    // Filter all prescriptions for this patient (match only by patientName and caseNumber)
-    const patientPrescriptions = prescriptions.filter((p: any) =>
-      p.patientName === patient.name && p.caseNumber === patient.caseNumber
-    );
-    setSelectedPatient({
-      ...patient,
-      diagnoses: Array.from(new Set(patientPrescriptions.map((p: any) => p.disease).filter(Boolean))),
-      treatments: [], // Not available in prescription data
-      allergies: [], // Not available in prescription data
-      labs: [], // Not available in prescription data
-      prescriptions: patientPrescriptions.map((pres: any) => ({
-        date: pres.date || (pres.createdAt ? new Date(pres.createdAt).toLocaleDateString('en-GB') : '-'),
-        medicines: pres.medicines || [],
-        notes: pres.notes || '',
-        disease: pres.disease || '',
-        age: pres.age || '-',
-        gender: pres.gender || '-',
-        bloodGroup: pres.bloodGroup || '-',
-        doctorName: pres.doctorName || '',
-        createdAt: pres.createdAt || '',
-        caseNumber: pres.caseNumber || '',
-      })),
-    });
-    setPatientSearch('');
-    setPatientResults([]);
+    try {
+      const res = await fetch(`/api/patients?search=${encodeURIComponent(value)}`);
+      if (!res.ok) throw new Error('Failed to fetch patients');
+      const data = await res.json();
+      setPatientResults(data.map((p: any) => ({
+        ...p,
+        age: typeof p.age === 'string' ? parseInt(p.age, 10) : p.age,
+        diagnoses: p.diagnoses || [],
+        treatments: p.treatments || [],
+        allergies: p.allergies || [],
+        labs: p.labs || [],
+        prescriptions: p.prescriptions || []
+      })));
+    } catch (error) {
+      console.error('Error searching patients:', error);
+      setPatientResults([]);
+    }
   };
 
   // Simulate profile update (no backend yet)
@@ -535,7 +591,7 @@ const DashboardNew: React.FC = () => {
                   </button>
                   <div style={{ marginBottom: 8 }}><strong>Case Number:</strong> {selectedPatient.caseNumber || 'Not Assigned'}</div>
                   <div style={{ marginBottom: 8 }}><strong>Name:</strong> {selectedPatient.name}</div>
-                  {selectedPatient.age && selectedPatient.age !== '-' && (
+                  {selectedPatient.age && selectedPatient.age > 0 && (
                     <div style={{ marginBottom: 8 }}><strong>Age:</strong> {selectedPatient.age}</div>
                   )}
                   {selectedPatient.gender && selectedPatient.gender !== '-' && (
@@ -604,10 +660,10 @@ const DashboardNew: React.FC = () => {
                     <span>{n.message}</span>
                     <span style={{ marginLeft: 'auto', color: '#94a3b8', fontSize: 13 }}>{n.time}</span>
                      {/* Add Accept/Reject buttons next to appointment request notifications */}
-                     {n.type === 'appointment_request' && (
+                     {n.type === 'appointment_request' && n.requestId && (
                         <div style={{display: 'flex', gap: '8px'}}>
                            <button
-                            onClick={() => handleRequestAction(n.requestId, 'accepted')}
+                            onClick={() => handleRequestAction(n.requestId!, 'accepted')}
                             style={{
                               padding: '4px 8px',
                               background: '#10b981',
@@ -622,7 +678,7 @@ const DashboardNew: React.FC = () => {
                             Accept
                           </button>
                           <button
-                             onClick={() => handleRequestAction(n.requestId, 'rejected')}
+                             onClick={() => handleRequestAction(n.requestId!, 'rejected')}
                              style={{
                                padding: '4px 8px',
                                background: '#ef4444',

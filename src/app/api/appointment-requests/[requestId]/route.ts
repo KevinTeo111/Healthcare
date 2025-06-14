@@ -4,7 +4,7 @@ import clientPromise from '../../mongodb';
 
 export async function PUT(
   request: Request,
-  context: { params: { requestId: string } }
+  context: { params: { requestId: string } }  // ✅ CORRECT FORMAT
 ) {
   try {
     const { requestId } = context.params;

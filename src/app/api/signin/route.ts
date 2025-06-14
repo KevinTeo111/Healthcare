@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
     const { email, password, role } = await request.json();
 
     console.log('Sign-in attempt for:', { email, role });
+    console.log('Password provided (first 5 chars): ', password ? password.substring(0, 5) + '...' : '[empty]');
 
     if (!email || !password || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid email, password, or role' }, { status: 401 });
     }
 
-    console.log('User found. Comparing passwords...');
+    console.log('User found. Hashed password in DB (first 5 chars): ', user.password ? user.password.substring(0, 5) + '...' : '[empty]');
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {

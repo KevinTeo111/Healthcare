@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '../mongodb';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,9 +19,16 @@ export async function POST(request: NextRequest) {
     }
 
     const db = client.db('prescriptionApp');
-    const user = await db.collection('users').findOne({ email, password, role });
+    const user = await db.collection('users').findOne({ email, role });
 
     if (!user) {
+      return NextResponse.json({ error: 'Invalid email, password, or role' }, { status: 401 });
+    }
+
+    // Compare the provided password with the hashed password in the database
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
       return NextResponse.json({ error: 'Invalid email, password, or role' }, { status: 401 });
     }
 

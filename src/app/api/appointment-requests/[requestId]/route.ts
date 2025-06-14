@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import clientPromise from '../../mongodb';
 
 export async function PUT(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { requestId: string } }
 ) {
   try {
@@ -38,4 +38,4 @@ export async function PUT(
     console.error('Error updating appointment request status:', error);
     return NextResponse.json({ error: error.message || 'Failed to update appointment request status' }, { status: 500 });
   }
-} 
+}

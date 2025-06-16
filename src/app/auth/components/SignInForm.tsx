@@ -153,7 +153,7 @@ export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
         boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
         borderRadius: 24,
         padding: "48px 40px 32px 40px",
-        width: 400,
+        width: 500,
         maxWidth: "90vw",
         display: "flex",
         flexDirection: "column",

@@ -6,7 +6,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const patientEmail = searchParams.get('patientEmail');
     const client = await clientPromise;
-    const db = client.db('hospital');
+    const db = client.db('prescriptionApp');
     let query = {};
     if (patientEmail) {
       query = { patient: patientEmail };

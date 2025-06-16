@@ -18,7 +18,7 @@ export async function GET(
     }
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     const appointment = await db.collection('appointments').findOne({
       _id: new ObjectId(id)
@@ -59,7 +59,7 @@ export async function PUT(
     }
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     // If updating date/time, check for conflicts
     if (date && time) {
@@ -136,7 +136,7 @@ export async function DELETE(
     }
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     const result = await db.collection('appointments').deleteOne({
       _id: new ObjectId(id)

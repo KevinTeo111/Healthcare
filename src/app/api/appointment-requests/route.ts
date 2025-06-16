@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     // Add a status field and timestamp to the request
     const newAppointmentRequest = {

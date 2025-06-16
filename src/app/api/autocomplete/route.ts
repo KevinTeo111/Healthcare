@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     }
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     let results: User[] = [];
     if (type === 'doctor') {

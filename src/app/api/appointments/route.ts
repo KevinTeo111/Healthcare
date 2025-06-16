@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const endDate = searchParams.get('endDate');
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     // Build query based on filters
     const query: any = {};
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     }
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     // Check for scheduling conflicts
     const existingAppointment = await db.collection('appointments').findOne({
@@ -135,7 +135,7 @@ export async function PUT(request: Request) {
     }
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     const updateData: any = {
       status,
@@ -184,7 +184,7 @@ export async function DELETE(request: Request) {
     }
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     const result = await db.collection('appointments').updateOne(
       { _id: new ObjectId(appointmentId) },

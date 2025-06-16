@@ -373,6 +373,7 @@ const Card: React.FC<{ title: string; children: React.ReactNode }> = ({ title, c
 
 const DashboardNew: React.FC = () => {
   const router = useRouter();
+  const [userName, setUserName] = useState('Loading...');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [patientSearch, setPatientSearch] = useState('');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
@@ -580,6 +581,58 @@ const DashboardNew: React.FC = () => {
     // Placeholder for save logic
     alert('Profile updated! (not yet saved to backend)');
   };
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    const localEmail = localStorage.getItem('userEmail');
+    const localName = localStorage.getItem('userName');
+    const userRole = localStorage.getItem('userRole');
+
+    if (!localEmail || !userRole || userRole !== 'doctor') {
+      router.push('/auth/signin');
+      return;
+    }
+
+    // Set name from localStorage initially
+    if (localName) {
+      setUserName(localName.split(' ')[0]);
+    }
+
+    // Then fetch latest user data
+    const fetchUser = async () => {
+      try {
+        console.log('Fetching user data for:', localEmail);
+        const res = await fetch(`/api/user?email=${encodeURIComponent(localEmail)}`, {
+          credentials: 'include'
+        });
+        
+        if (!res.ok) {
+          if (res.status === 404) {
+            console.error('User not found');
+            router.push('/auth/signin');
+            return;
+          }
+          throw new Error('Failed to fetch user');
+        }
+        
+        const data = await res.json();
+        console.log('User data received:', data);
+        
+        if (data && (data.firstName || data.name)) {
+          const displayName = data.firstName || data.name.split(' ')[0];
+          setUserName(displayName);
+          // Update localStorage with latest data
+          localStorage.setItem('userName', data.name);
+          localStorage.setItem('userRole', data.role);
+}
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setUserName('Doctor'); // Fallback name
+      }
+    };
+
+    fetchUser();
+  }, []); // Run only once on mount
 
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f1f5f9', flexDirection: 'column' }}>

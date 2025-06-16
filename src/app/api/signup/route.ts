@@ -1,47 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import clientPromise from '../mongodb';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Starting signup process...');
     const { firstName, lastName, email, password, role } = await request.json();
-    console.log('Received signup request for:', { email, role });
+    console.log('Signup attempt:', { email, role, name: `${firstName} ${lastName}` });
 
     if (!firstName || !lastName || !email || !password || !role) {
-      console.log('Missing required fields:', { firstName, lastName, email, role });
+      console.log('Missing fields:', { 
+        firstName: !!firstName, 
+        lastName: !!lastName, 
+        email: !!email, 
+        password: !!password, 
+        role: !!role 
+      });
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    console.log('Connecting to database...');
-    const { db } = await connectToDatabase();
-    console.log('Connected to database successfully');
+    let client;
+    try {
+      client = await clientPromise;
+      console.log('MongoDB connected successfully');
+    } catch (error) {
+      console.error('MongoDB connection error during signup:', error);
+      return NextResponse.json({ error: 'Database connection error. Please try again.' }, { status: 503 });
+    }
 
-    // Check if user already exists
+    const db = client.db('prescriptionApp');
     console.log('Checking for existing user...');
+
     const existingUser = await db.collection('users').findOne({ email, role });
     if (existingUser) {
       console.log('User already exists:', { email, role });
       return NextResponse.json({ error: `User with email ${email} and role ${role} already exists` }, { status: 409 });
     }
 
-    // Hash password
-    console.log('Hashing password...');
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Password hashed successfully');
 
-    // Create user
     console.log('Creating new user...');
-    const result = await db.collection('users').insertOne({ 
+    const newUser = { 
       firstName, 
       lastName, 
-      fullName: `${firstName} ${lastName}`,
+      fullName: `${firstName} ${lastName}`, 
       email, 
-      password: hashedPassword, 
+      password: hashedPassword,
       role,
       createdAt: new Date(),
-      updatedAt: new Date()
-    });
-    console.log('User created successfully:', { userId: result.insertedId });
+    };
+
+    await db.collection('users').insertOne(newUser);
+    console.log('User created successfully');
 
     return NextResponse.json({ 
       message: 'User registered successfully',
@@ -49,19 +60,11 @@ export async function POST(request: NextRequest) {
       email,
       role
     }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Signup error:', error);
-    // Log more details about the error
-    if (error instanceof Error) {
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
+    if (error.code === 'ECONNRESET') {
+      return NextResponse.json({ error: 'Connection error. Please try again.' }, { status: 503 });
     }
-    return NextResponse.json({ 
-      error: 'Internal server error during signup',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error during signup' }, { status: 500 });
   }
 }

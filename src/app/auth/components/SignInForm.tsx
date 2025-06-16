@@ -40,34 +40,66 @@ export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
     setError(null);
 
     try {
-      const res = await fetch('/api/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, password: formData.password, role: formData.role }),
+      console.log('Form data:', {
+        email: formData.email,
+        role: formData.role,
+        passwordLength: formData.password?.length || 0
       });
 
-      const data: SignInResponse = await res.json();
+      const res = await fetch('/api/signin', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: formData.email.toLowerCase(),
+          password: formData.password,
+          role: formData.role
+        }),
+        credentials: 'include',
+      });
+
+      const data = await res.json();
+      console.log('Sign in response:', { 
+        status: res.status,
+        ok: res.ok,
+        data
+      });
 
       if (!res.ok) {
         throw new Error(data.error || 'Failed to sign in');
       }
 
-      console.log('User signed in with role:', data.role);
-
-      // Store user info in localStorage
-      localStorage.setItem('userEmail', formData.email);
+      // Clear any existing auth data
+      localStorage.clear();
+      
+      // Store new user info
+      localStorage.setItem('userEmail', formData.email.toLowerCase());
       localStorage.setItem('userName', data.name);
       localStorage.setItem('userRole', data.role);
+      
+      console.log('Stored user data:', { 
+        email: formData.email.toLowerCase(), 
+        name: data.name, 
+        role: data.role 
+      });
 
       // Redirect based on role
       if (data.role === 'doctor') {
-        router.push('/doctor');
+        console.log('Redirecting to doctor dashboard...');
+        router.push('/dashboard/doctor');
+        router.refresh(); // Force a refresh to ensure the new route is loaded
+      } else if (data.role === 'admin') {
+        router.push('/dashboard/admin');
+        router.refresh();
       } else {
         router.push('/dashboard/patient');
+        router.refresh();
       }
 
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in');
+    } catch (err: any) {
+      console.error('Sign in error:', err);
+      setError(err.message || 'Failed to sign in. Please try again.');
     } finally {
       setLoading(false);
     }

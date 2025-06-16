@@ -26,7 +26,7 @@ export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
-    role: 'patient' // Default role
+    role: 'doctor' // Default role
   });
   const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -253,6 +253,19 @@ export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
                       padding: '12px 16px',
                       color: "#fff",
                       cursor: "pointer",
+                      backgroundColor: formData.role === 'doctor' ? 'rgba(255,255,255,0.1)' : 'transparent',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = formData.role === 'doctor' ? 'rgba(255,255,255,0.1)' : 'transparent'}
+                    onClick={() => handleRoleSelect('doctor')}
+                  >
+                    Doctor
+                  </div>
+                  <div
+                    style={{
+                      padding: '12px 16px',
+                      color: "#fff",
+                      cursor: "pointer",
                       backgroundColor: formData.role === 'patient' ? 'rgba(255,255,255,0.1)' : 'transparent',
                       borderBottom: '1px solid #444'
                     }}
@@ -262,19 +275,7 @@ export default function SignInForm({ onSwitchToSignUp }: SignInFormProps) {
                   >
                     Patient
                   </div>
-                  <div
-                    style={{
-                      padding: '12px 16px',
-                      color: "#fff",
-                      cursor: "pointer",
-                      backgroundColor: formData.role === 'doctor' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = formData.role === 'doctor' ? 'rgba(255,255,255,0.1)' : 'transparent'}
-                    onClick={() => handleRoleSelect('doctor')}
-                  >
-                    Doctor
-                  </div>
+                  
                 </div>
               )}
             </div>

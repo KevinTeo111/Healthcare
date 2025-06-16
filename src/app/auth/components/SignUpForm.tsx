@@ -31,7 +31,7 @@ export default function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
     lastName: '',
     email: '',
     password: '',
-    role: 'patient' // Default role
+    role: 'doctor' // Default role
   });
   const [error, setError] = useState<string | null>(null);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);

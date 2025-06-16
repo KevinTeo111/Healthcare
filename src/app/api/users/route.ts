@@ -21,7 +21,7 @@ export async function GET() {
   while (retryCount < maxRetries) {
     try {
       console.log(`Attempt ${retryCount + 1} to fetch users...`);
-      const { db } = await connectToDatabase();
+      const { db } = await connectToDatabase('prescriptionApp');
       console.log('Connected to database successfully');
 
       // Verify the users collection exists
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     }
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     // Check if user already exists
     const existingUser = await db.collection('users').findOne({ email });
@@ -132,7 +132,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db('prescriptionApp');
 
     const result = await db.collection('users').deleteOne({ email });
 

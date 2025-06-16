@@ -50,10 +50,10 @@ if (process.env.NODE_ENV === 'development') {
   clientPromise = createClient();
 }
 
-export async function connectToDatabase() {
+export async function connectToDatabase(dbName: string = 'healthsync') {
   try {
     const client = await clientPromise;
-    const db = client.db('healthsync');
+    const db = client.db(dbName);
     
     // Test the connection
     await db.command({ ping: 1 });
@@ -74,7 +74,7 @@ export async function connectToDatabase() {
     client = new MongoClient(uri, options);
     clientPromise = createClient();
     const newClient = await clientPromise;
-    const db = newClient.db('healthsync');
+    const db = newClient.db(dbName);
     return { client: newClient, db };
   }
 }

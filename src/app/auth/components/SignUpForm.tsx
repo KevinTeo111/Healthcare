@@ -116,30 +116,31 @@ export default function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
     }}>
       <div className="signup-container" style={{
         background: "rgba(30, 32, 38, 0.85)",
-        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-        borderRadius: 24,
-        padding: "48px 40px 32px 40px",
-        width: 400,
-        maxWidth: "90vw",
+        boxShadow: "0 0.8rem 3.2rem 0 rgba(31, 38, 135, 0.37)",
+        borderRadius: "2.4rem",
+        padding: "4.8rem 4rem 3.2rem 4rem",
+        maxWidth: "40rem",
+        margin: "0 auto",
+        width: "90vw",
         display: "flex",
         flexDirection: "column",
         alignItems: "center"
       }}>
-        <div className="logo" style={{display: "flex", alignItems: "center", gap: 10, marginBottom: 12}}>
-          <div className="logo-icon" style={{width: 32, height: 32, background: "#6c63ff", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center"}}>
-            <span style={{color: "#fff", fontSize: 22, fontWeight: "bold", fontFamily: "Arial, sans-serif"}}>✦</span>
+        <div className="logo" style={{display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.2rem"}}>
+          <div className="logo-icon" style={{width: "3.2rem", height: "3.2rem", background: "#6c63ff", borderRadius: "0.8rem", display: "flex", alignItems: "center", justifyContent: "center"}}>
+            <span style={{color: "#fff", fontSize: "2.2rem", fontWeight: "bold", fontFamily: "Arial, sans-serif"}}>✦</span>
           </div>
-          <span className="logo-text" style={{color: "#6c63ff", fontSize: 22, fontWeight: 700, letterSpacing: 1}}>HealthSync</span>
+          <span className="logo-text" style={{color: "#6c63ff", fontSize: "2.2rem", fontWeight: 700, letterSpacing: "0.1rem"}}>HealthSync</span>
         </div>
-        <div className="signup-title" style={{color: "#fff", fontSize: "2.2rem", fontWeight: 700, marginBottom: 24, textAlign: "center"}}>Sign Up</div>
+        <div className="signup-title" style={{color: "#fff", fontSize: "2.2rem", fontWeight: 700, marginBottom: "2.4rem", textAlign: "center"}}>Sign Up</div>
         {error && (
           <div style={{
-            padding: '12px',
+            padding: '1.2rem',
             background: '#f87171',
             color: '#fff',
-            borderRadius: '6px',
-            marginBottom: '16px',
-            fontSize: '14px',
+            borderRadius: '0.6rem',
+            marginBottom: '1.6rem',
+            fontSize: '1.4rem',
             width: '100%',
             textAlign: 'center'
           }}>
@@ -148,60 +149,60 @@ export default function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
         )}
         <form style={{width: "100%"}} onSubmit={handleSubmit}>
           <div>
-            <label className="input-label" htmlFor="firstName" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, marginTop: 18, fontWeight: 500, display: "block"}}>First Name</label>
-            <div style={{width: "100%", marginBottom: 16}}>
-              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: 24, border: "1px solid #444", padding: "0 16px", height: 44}}>
-                <span className="input-icon" style={{color: "#bdbdbd", marginRight: 10, fontSize: "1.1rem"}}>👤</span>
-                <input type="text" id="firstName" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0"}} />
+            <label className="input-label" htmlFor="firstName" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: "0.8rem", marginTop: "1.8rem", fontWeight: 500, display: "block"}}>First Name</label>
+            <div style={{width: "100%", marginBottom: "1.6rem"}}>
+              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: "2.4rem", border: "0.1rem solid #444", padding: "0 1.6rem", height: "4.4rem"}}>
+                <span className="input-icon" style={{color: "#bdbdbd", marginRight: "1rem", fontSize: "1.1rem"}}>👤</span>
+                <input type="text" id="firstName" name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "1rem 0"}} />
               </div>
             </div>
           </div>
           <div>
-            <label className="input-label" htmlFor="lastName" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, marginTop: 18, fontWeight: 500, display: "block"}}>Last Name</label>
-            <div style={{width: "100%", marginBottom: 16}}>
-              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: 24, border: "1px solid #444", padding: "0 16px", height: 44}}>
-                <span className="input-icon" style={{color: "#bdbdbd", marginRight: 10, fontSize: "1.1rem"}}>👤</span>
-                <input type="text" id="lastName" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0"}} />
+            <label className="input-label" htmlFor="lastName" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: "0.8rem", marginTop: "1.8rem", fontWeight: 500, display: "block"}}>Last Name</label>
+            <div style={{width: "100%", marginBottom: "1.6rem"}}>
+              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: "2.4rem", border: "0.1rem solid #444", padding: "0 1.6rem", height: "4.4rem"}}>
+                <span className="input-icon" style={{color: "#bdbdbd", marginRight: "1rem", fontSize: "1.1rem"}}>👤</span>
+                <input type="text" id="lastName" name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "1rem 0"}} />
               </div>
             </div>
           </div>
           <div>
-            <label className="input-label" htmlFor="email" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, fontWeight: 500, display: "block"}}>Enter your E-mail</label>
-            <div style={{width: "100%", marginBottom: 16}}>
-              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: 24, border: "1px solid #444", padding: "0 16px", height: 44}}>
-                <span className="input-icon" style={{color: "#bdbdbd", marginRight: 10, fontSize: "1.1rem"}}>@</span>
-                <input type="email" id="email" name="email" placeholder="your@email.com" value={formData.email} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0"}} />
+            <label className="input-label" htmlFor="email" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: "0.8rem", fontWeight: 500, display: "block"}}>Enter your E-mail</label>
+            <div style={{width: "100%", marginBottom: "1.6rem"}}>
+              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: "2.4rem", border: "0.1rem solid #444", padding: "0 1.6rem", height: "4.4rem"}}>
+                <span className="input-icon" style={{color: "#bdbdbd", marginRight: "1rem", fontSize: "1.1rem"}}>@</span>
+                <input type="email" id="email" name="email" placeholder="your@email.com" value={formData.email} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "1rem 0"}} />
               </div>
             </div>
           </div>
           <div>
-            <label className="input-label" htmlFor="password" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, fontWeight: 500, display: "block"}}>Set your Password</label>
-            <div style={{width: "100%", marginBottom: 16}}>
-              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: 24, border: "1px solid #444", padding: "0 16px", height: 44}}>
-                <span className="input-icon" style={{color: "#bdbdbd", marginRight: 10, fontSize: "1.1rem"}}>🔑</span>
-                <input type="password" id="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "10px 0"}} />
+            <label className="input-label" htmlFor="password" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: "0.8rem", fontWeight: 500, display: "block"}}>Set your Password</label>
+            <div style={{width: "100%", marginBottom: "1.6rem"}}>
+              <div className="input-wrapper" style={{display: "flex", alignItems: "center", background: "rgba(255,255,255,0.08)", borderRadius: "2.4rem", border: "0.1rem solid #444", padding: "0 1.6rem", height: "4.4rem"}}>
+                <span className="input-icon" style={{color: "#bdbdbd", marginRight: "1rem", fontSize: "1.1rem"}}>🔑</span>
+                <input type="password" id="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} required style={{background: "transparent", border: "none", outline: "none", color: "#fff", fontSize: "1rem", width: "100%", padding: "1rem 0"}} />
               </div>
             </div>
           </div>
           <div>
-            <label className="input-label" htmlFor="role" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: 8, fontWeight: 500, display: "block"}}>Select Role</label>
-            <div style={{width: "100%", marginBottom: 24, position: 'relative'}} ref={dropdownRef}>
+            <label className="input-label" htmlFor="role" style={{color: "#d1d1d1", fontSize: "0.98rem", marginBottom: "0.8rem", fontWeight: 500, display: "block"}}>Select Role</label>
+            <div style={{width: "100%", marginBottom: "2.4rem", position: 'relative'}} ref={dropdownRef}>
               <div
                 className="input-wrapper"
                 style={{
                   display: "flex",
                   alignItems: "center",
                   background: "rgba(255,255,255,0.08)",
-                  borderRadius: 24,
-                  border: "1px solid #444",
-                  padding: "0 16px",
-                  height: 44,
+                  borderRadius: "2.4rem",
+                  border: "0.1rem solid #444",
+                  padding: "0 1.6rem",
+                  height: "4.4rem",
                   cursor: 'pointer',
                   justifyContent: 'space-between'
                 }}
                 onClick={() => setIsRoleDropdownOpen(prev => !prev)}
               >
-                 <span className="input-icon" style={{color: "#bdbdbd", marginRight: 10, fontSize: "1.1rem"}}>👥</span>
+                 <span className="input-icon" style={{color: "#bdbdbd", marginRight: "1rem", fontSize: "1.1rem"}}>👥</span>
                 <span style={{color: "#fff", fontSize: "1rem", flexGrow: 1}}>
                   {formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
                 </span>
@@ -210,22 +211,22 @@ export default function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
               {isRoleDropdownOpen && (
                 <div style={{
                   position: 'absolute',
-                  top: 'calc(100% + 8px)',
+                  top: 'calc(100% + 0.8rem)',
                   left: 0,
                   right: 0,
                   background: "#2d2d3a",
-                  borderRadius: 8,
-                  boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+                  borderRadius: "0.8rem",
+                  boxShadow: "0 0.4rem 1.6rem rgba(0,0,0,0.4)",
                   zIndex: 10,
                   overflow: 'hidden'
                 }}>
                   <div
                     style={{
-                      padding: '12px 16px',
+                      padding: '1.2rem 1.6rem',
                       color: "#fff",
                       cursor: "pointer",
                       backgroundColor: formData.role === 'patient' ? 'rgba(255,255,255,0.1)' : 'transparent',
-                      borderBottom: '1px solid #444'
+                      borderBottom: '0.1rem solid #444'
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = formData.role === 'patient' ? 'rgba(255,255,255,0.1)' : 'transparent'}
@@ -235,7 +236,7 @@ export default function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
                   </div>
                   <div
                     style={{
-                      padding: '12px 16px',
+                      padding: '1.2rem 1.6rem',
                       color: "#fff",
                       cursor: "pointer",
                       backgroundColor: formData.role === 'doctor' ? 'rgba(255,255,255,0.1)' : 'transparent',

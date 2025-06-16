@@ -557,6 +557,7 @@ Notes: ${notes}
               {searchResults.length > 0 && (
                 <ul style={{
                   position: 'absolute',
+                  
                   zIndex: 10,
                   backgroundColor: 'white',
                   border: '1px solid #cbd5e1',

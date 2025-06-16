@@ -7,7 +7,7 @@
 
 /* Set a comfortable base font and background */
 html {
-  font-size: 62.5% !important; /* Set 1rem to 10px */
+  font-size: 16px; /* Base font size */
 }
 
 body {

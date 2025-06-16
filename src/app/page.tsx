@@ -6,7 +6,7 @@ import SignInForm from './auth/components/SignInForm';
 import './globals.css';
 
 const AuthPage: React.FC = () => {
-  const [mode, setMode] = useState<'signup' | 'signin'>('signup');
+  const [mode, setMode] = useState<'signup' | 'signin'>('signin');
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: "'Segoe UI', Arial, sans-serif", background: '#f5f8ff', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem' }}>

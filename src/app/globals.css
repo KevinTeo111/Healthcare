@@ -6,6 +6,10 @@
 }
 
 /* Set a comfortable base font and background */
+html {
+  font-size: 16px; /* Base font size */
+}
+
 body {
   font-family: 'Segoe UI', Arial, sans-serif;
   background: #f8f9fa;

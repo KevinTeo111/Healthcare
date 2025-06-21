@@ -399,6 +399,18 @@ Notes: ${notes}
       overflowY: 'scroll', // Enable both up and down scrolling
       height: '100vh'
     }}>
+      <style>{`
+        @media (max-width: 600px) {
+          .prescription-form-row {
+            flex-direction: column !important;
+            gap: 0 !important;
+          }
+          .prescription-form-row > div {
+            width: 100% !important;
+            margin-bottom: 12px !important;
+          }
+        }
+      `}</style>
       <div className="login-container" style={{
         background: 'rgba(255,255,255,0.92)',
         boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.18)',
@@ -443,7 +455,7 @@ Notes: ${notes}
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{width: '100%'}}>
-            <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+            <div className="prescription-form-row" style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
               <div style={{ flex: 1 }}>
                 <label style={{ display: 'block', marginBottom: 4 }}>Case Number</label>
                 <input

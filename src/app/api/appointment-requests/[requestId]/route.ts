@@ -3,9 +3,12 @@ import { ObjectId } from 'mongodb';
 import clientPromise from '../../mongodb';
 
 // GET /api/appointment-requests/[requestId]
-export async function GET(_request: Request, { params }: { params: { requestId: string } }) {
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ requestId: string }> }
+) {
   try {
-    const { requestId } = params;
+    const { requestId } = await params;
     const client = await clientPromise;
     const db = client.db('prescriptionApp');
 
@@ -28,9 +31,12 @@ export async function GET(_request: Request, { params }: { params: { requestId: 
 }
 
 // PUT /api/appointment-requests/[requestId]
-export async function PUT(request: Request, { params }: { params: { requestId: string } }) {
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ requestId: string }> }
+) {
   try {
-    const { requestId } = params;
+    const { requestId } = await params;
     const body = await request.json();
     const { status, doctorName, doctorEmail, notes } = body;
 
@@ -70,9 +76,12 @@ export async function PUT(request: Request, { params }: { params: { requestId: s
 }
 
 // DELETE /api/appointment-requests/[requestId]
-export async function DELETE(_request: Request, { params }: { params: { requestId: string } }) {
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ requestId: string }> }
+) {
   try {
-    const { requestId } = params;
+    const { requestId } = await params;
     const client = await clientPromise;
     const db = client.db('prescriptionApp');
 

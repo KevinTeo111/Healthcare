@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '../mongodb';
 import bcrypt from 'bcryptjs';
+import { signJwt } from '../utils/jwt';
 
 export async function POST(request: NextRequest) {
   try {
@@ -93,8 +94,24 @@ export async function POST(request: NextRequest) {
       role: user.role
     };
 
-    console.log('Sending response:', response);
-    return NextResponse.json(response, { status: 200 });
+    // Issue JWT
+    const { token, maxAge } = signJwt({
+      userId: String(user._id),
+      email: user.email,
+      role: user.role,
+      name: response.name,
+    });
+
+    const res = NextResponse.json(response, { status: 200 });
+    res.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge,
+    });
+    console.log('Sending response with JWT cookie');
+    return res;
   } catch (error: any) {
     console.error('Sign-in error:', error);
     return NextResponse.json({ 

@@ -2,12 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '../mongodb';
 import { connectToDatabase } from '../mongodb';
 import { ObjectId, WithId, Document } from 'mongodb';
+import { readTokenFromRequest, verifyJwt } from '../utils/jwt';
 
 // GET /api/user?email=... (single user) or /api/user (all users)
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const email = searchParams.get('email');
+
+    // Require valid JWT for access
+    const token = readTokenFromRequest(request as unknown as Request);
+    const decoded = token ? verifyJwt(token) as any : null;
+    if (!decoded) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
     if (email) {
       // Fetch single user by email

@@ -30,6 +30,7 @@ interface Appointment {
   preferredTime: string;
   status: string;
   doctorName: string;
+  patientName?: string;
   createdAt: string;
 }
 
@@ -52,7 +53,7 @@ const Navbar: React.FC = () => {
       }
       
       try {
-        const response = await fetch(`/api/users?email=${email}`);
+        const response = await fetch(`/api/user?email=${email}`);
         if (response.ok) {
           const data = await response.json();
           setUserData(data);
@@ -185,7 +186,7 @@ const PatientDashboard: React.FC = () => {
         }
 
         // Fetch user data to get the full name and other details
-        const userResponse = await fetch(`/api/users?email=${userEmail}`);
+        const userResponse = await fetch(`/api/user?email=${userEmail}`);
         if (!userResponse.ok) {
           throw new Error('Failed to fetch user data');
         }
@@ -199,7 +200,7 @@ const PatientDashboard: React.FC = () => {
         if (userData.bloodGroup) caseNumberParams.append('bloodGroup', userData.bloodGroup);
 
         const [appointmentsRes, previousRes, caseNumberRes] = await Promise.all([
-          fetch(`/api/appointment-requests?email=${userEmail}&role=patient`),
+          fetch(`/api/appointments?email=${userEmail}&role=patient`),
           fetch(`/api/appointments/previous?email=${userEmail}`),
           fetch(`/api/prescriptions/patient-case?${caseNumberParams.toString()}`)
         ]);
@@ -387,7 +388,7 @@ const PatientDashboard: React.FC = () => {
                           onClick={async () => {
                             if (confirm('Are you sure you want to cancel this appointment?')) {
                               try {
-                                const response = await fetch(`/api/appointment-requests/${appointment._id}`, {
+                                const response = await fetch(`/api/appointments/${appointment._id}`, {
                                   method: 'DELETE',
                                 });
                                 if (!response.ok) throw new Error('Failed to cancel appointment');
@@ -446,6 +447,11 @@ const PatientDashboard: React.FC = () => {
                     <p style={{ fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}>
                       Dr. {appointment.doctorName || 'Ketan Patel'}
                     </p>
+                    {appointment.patientName && (
+                      <p style={{ color: '#475569', marginBottom: '4px' }}>
+                        Patient: {appointment.patientName}
+                      </p>
+                    )}
                     <p style={{ color: '#64748b', marginBottom: '4px' }}>
                       {new Date(appointment.preferredDate).toLocaleDateString('en-GB')} at {appointment.preferredTime}
                     </p>

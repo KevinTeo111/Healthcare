@@ -6,6 +6,6 @@ export async function POST(req: Request) {
   // Use absolute URL for redirect
   const baseUrl = req.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const response = NextResponse.redirect(baseUrl + '/auth/signin');
-  response.cookies.set('token', '', { maxAge: 0, path: '/' });
+  response.cookies.set('token', '', { maxAge: 0, path: '/', httpOnly: true, sameSite: 'lax' });
   return response;
 }

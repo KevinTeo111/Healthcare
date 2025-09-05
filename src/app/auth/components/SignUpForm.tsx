@@ -33,6 +33,7 @@ export default function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
     password: '',
     role: 'doctor' // Default role
   });
+  const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -52,6 +53,8 @@ export default function SignUpForm({ onSwitchToSignIn }: SignUpFormProps) {
         const data = await res.json();
         throw new Error(data.error || 'Failed to sign up');
       }
+
+      localStorage.clear();
 
       const data: SignUpResponse = await res.json();
 

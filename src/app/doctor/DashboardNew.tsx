@@ -167,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onClose }) => {
 };
 
 // Topbar component
-const Topbar: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
+const Topbar: React.FC<{ onMenuClick: () => void; offsetLeft?: number }> = ({ onMenuClick, offsetLeft = 0 }) => {
   const [userName, setUserName] = React.useState('Loading...');
   const [searchTerm, setSearchTerm] = React.useState('');
   const [searchResults, setSearchResults] = React.useState<SearchResult[]>([]);
@@ -248,7 +248,7 @@ const Topbar: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
       borderBottom: '1px solid #e2e8f0',
       position: 'fixed',
       top: 0,
-      left: 0,
+      left: offsetLeft,
       right: 0,
       zIndex: 1100,
       gap: 16,
@@ -393,23 +393,27 @@ const DashboardNew: React.FC = () => {
   useEffect(() => {
     const fetchNotificationsAndRequests = async () => {
       try {
-        // Fetch general notifications
-        const notificationsRes = await fetch('/api/notifications', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-        
-        if (!notificationsRes.ok) {
-          console.error('Failed to fetch notifications:', notificationsRes.status, notificationsRes.statusText);
-          throw new Error(`Notifications fetch failed: ${notificationsRes.statusText}`);
+        // Fetch general notifications (tolerant to failures)
+        let generalNotifications: any[] = [];
+        try {
+          const notificationsRes = await fetch('/api/notifications', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          });
+          if (notificationsRes.ok) {
+            generalNotifications = await notificationsRes.json();
+          } else {
+            console.warn('Notifications fetch not OK:', notificationsRes.status, notificationsRes.statusText);
+          }
+        } catch (notifErr) {
+          console.warn('Notifications fetch failed, proceeding without notifications:', notifErr);
         }
-        const generalNotifications = await notificationsRes.json();
 
-        // Fetch pending appointments
-        const appointmentsRes = await fetch('/api/appointments?status=pending', {
+        // Fetch pending appointment requests
+        const appointmentsRes = await fetch('/api/appointment-requests?status=pending', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -441,11 +445,11 @@ const DashboardNew: React.FC = () => {
 
         const now = new Date();
 
-        // Format appointments as notifications
+        // Format appointment requests as notifications
         const appointmentNotifications = pendingAppointments.map((appointment: any) => ({
           id: appointment._id,
-          type: 'appointment',
-          message: `New appointment request from ${appointment.patientName} for ${new Date(appointment.date).toLocaleDateString()} at ${appointment.time}.`,
+          type: 'appointment_request',
+          message: `New appointment request from ${appointment.patientName} for ${new Date(appointment.preferredDate).toLocaleDateString()} at ${appointment.preferredTime}.`,
           time: appointment.createdAt ? new Date(appointment.createdAt).toLocaleTimeString() : 'Just now',
           createdAt: appointment.createdAt || now.toISOString(),
           appointmentId: appointment._id,
@@ -489,12 +493,12 @@ const DashboardNew: React.FC = () => {
     
     // Optimistically update UI: remove the appointment notification from the list
     setNotifications((prevNotifications: Notification[]) => 
-      prevNotifications.filter((n: Notification) => !(n.type === 'appointment' && n.appointmentId === appointmentId))
+      prevNotifications.filter((n: Notification) => !(n.type === 'appointment_request' && n.appointmentId === appointmentId))
     );
 
     try {
-      // Call the backend API to update the appointment status
-      const res = await fetch(`/api/appointments/${appointmentId}`, {
+      // Call the backend API to update the appointment request status
+      const res = await fetch(`/api/appointment-requests/${appointmentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
@@ -638,8 +642,8 @@ const DashboardNew: React.FC = () => {
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#f1f5f9', flexDirection: 'column' }}>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        <div style={{ flex: 1, paddingTop: 64, paddingLeft: 24, paddingRight: 24, overflowY: 'auto' }}>
-          <Topbar onMenuClick={() => setSidebarOpen(true)} />
+        <div style={{ flex: 1, paddingTop: 64, paddingLeft: 24, paddingRight: 24, overflowY: 'auto', marginLeft: sidebarOpen ? 220 : 0, transition: 'margin-left 0.3s cubic-bezier(.4,0,.2,1)' }}>
+          <Topbar onMenuClick={() => setSidebarOpen(true)} offsetLeft={sidebarOpen ? 220 : 0} />
           <div style={{ display: 'flex', gap: 24, marginTop: 24, flexWrap: 'wrap', justifyContent: 'center' }}>
             {/* Patient Medical History & Prescription History */}
             <Card title="Patient Medical History & Prescriptions">

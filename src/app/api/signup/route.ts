@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '../mongodb';
 import bcrypt from 'bcryptjs';
+import { signJwt } from '../utils/jwt';
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,15 +52,31 @@ export async function POST(request: NextRequest) {
       createdAt: new Date(),
     };
 
-    await db.collection('users').insertOne(newUser);
+    const insertResult = await db.collection('users').insertOne(newUser);
     console.log('User created successfully');
 
-    return NextResponse.json({ 
+    // Auto-sign-in: issue JWT
+    const { token, maxAge } = signJwt({
+      userId: String(insertResult.insertedId),
+      email,
+      role,
+      name: `${firstName} ${lastName}`,
+    });
+
+    const res = NextResponse.json({ 
       message: 'User registered successfully',
       name: `${firstName} ${lastName}`,
       email,
       role
     }, { status: 201 });
+    res.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge,
+    });
+    return res;
   } catch (error: any) {
     console.error('Signup error:', error);
     if (error.code === 'ECONNRESET') {

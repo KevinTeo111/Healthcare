@@ -16,6 +16,7 @@ bun dev
 ```
 The first change is required high level.
 The second change is required more high level and skills
+yolo
 ```
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
